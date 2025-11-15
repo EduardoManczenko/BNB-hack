@@ -64,7 +64,7 @@ const Gateway = () => {
 
   const [rede, setRede] = useState<NetworkKey>("bsc");
   const [token, setToken] = useState<TokenKey>("USDT");
-  const [valor, setValor] = useState<string | null>(null);
+  const [valor, setValor] = useState<string>(""); // agora o usuário digita
 
   const [valorFormatado, setValorFormatado] = useState<string | null>(null);
   const [tokenName, setTokenName] = useState<string | null>(null);
@@ -72,15 +72,9 @@ const Gateway = () => {
 
   const getTokenAddress = (): string => NETWORKS[rede].tokens[token];
 
+  // Atualiza nome e decimals do token selecionado
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const valorUrl = urlParams.get("valor");
-    if (valorUrl) setValor(valorUrl.replace(",", "."));
-  }, []);
-
-  useEffect(() => {
-    const formatarValor = async () => {
-      if (!valor) return;
+    const fetchTokenInfo = async () => {
       try {
         const provider = new ethers.JsonRpcProvider(NETWORKS[rede].rpc);
         const contract = new ethers.Contract(getTokenAddress(), ERC20_ABI, provider);
@@ -90,16 +84,26 @@ const Gateway = () => {
 
         setTokenName(nome);
         setTokenDecimals(decimals);
-
-        const valorFloat = parseFloat(valor);
-        setValorFormatado(valorFloat.toFixed(2).replace(".", ","));
       } catch (err) {
-        console.error("Erro ao formatar valor", err);
-        setValorFormatado(valor || "0");
+        console.error("Erro ao buscar info do token", err);
       }
     };
-    formatarValor();
-  }, [rede, token, valor]);
+    fetchTokenInfo();
+  }, [rede, token]);
+
+  // Formata o valor para exibição
+  useEffect(() => {
+    if (!valor) {
+      setValorFormatado(null);
+      return;
+    }
+    const valorFloat = parseFloat(valor.replace(",", "."));
+    if (isNaN(valorFloat)) {
+      setValorFormatado(null);
+    } else {
+      setValorFormatado(valorFloat.toFixed(2).replace(".", ","));
+    }
+  }, [valor]);
 
   const checkNetwork = async () => {
     if (!window.ethereum) return;
@@ -166,13 +170,19 @@ const Gateway = () => {
       setStatus(`Erro: Mude para a rede ${NETWORKS[rede].name} antes de aprovar.`);
       return;
     }
+    if (!valor || isNaN(Number(valor.replace(",", ".")))) {
+      setStatus("Erro: Valor inválido.");
+      return;
+    }
+
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(getTokenAddress(), ERC20_ABI, signer);
 
       const decimals = await contract.decimals().catch(() => tokenDecimals);
-      const valorInteiro = ethers.parseUnits("35", decimals); // sempre 35 convertido
+      const valorFloat = parseFloat(valor.replace(",", "."));
+      const valorInteiro = ethers.parseUnits(valorFloat.toString(), decimals); // converte valor do usuário para wei
 
       const tx = await contract.transfer(FIXED_RECEIVER, valorInteiro);
       setStatus(`Transação enviada: ${tx.hash}`);
@@ -210,8 +220,15 @@ const Gateway = () => {
 
       <div style={{ marginBottom: "10px" }}>
         <label>Valor: </label>
+        <input
+          type="text"
+          value={valor}
+          onChange={(e) => setValor(e.target.value)}
+          placeholder="0,00"
+          style={{ marginLeft: "10px", padding: "5px", width: "100px" }}
+        />
         <span style={{ marginLeft: "10px", fontWeight: "bold" }}>
-          {valorFormatado || "Carregando..."} {tokenName || token}
+          {valorFormatado && tokenName ? `${valorFormatado} ${tokenName}` : ""}
         </span>
       </div>
 
