@@ -56,16 +56,21 @@ const NETWORKS: Record<
 
 const FIXED_RECEIVER = "0xed14922507cee9938faaf2958d577a2aeea9c4e7";
 
+//
+// 🔥 Função essencial para MetaMask/Trust Wallet Mobile
+//
 function getEthereum() {
   if (typeof window === "undefined") return null;
-
   const eth = window.ethereum;
 
   if (eth?.isMetaMask) return eth;
 
+  // detecta múltiplos providers (MetaMask + Trust Wallet Mobile)
   if (Array.isArray(eth?.providers)) {
     const mm = eth.providers.find((p: any) => p.isMetaMask);
-    if (mm) return mm;
+    const tw = eth.providers.find((p: any) => p.isTrust || p.isWalletConnect);
+
+    return mm || tw || eth;
   }
 
   return eth ?? null;
@@ -91,16 +96,6 @@ const Gateway = () => {
   const getTokenAddress = (): string => NETWORKS[rede].tokens[token];
 
   //
-  // DESCONECTAR CARTEIRA
-  //
-  const disconnectWallet = () => {
-    setWalletAddress(null);
-    setCanApprove(false);
-    setStatus("Carteira desconectada.");
-    setIsCorrectNetwork(false);
-  };
-
-  //
   // BUSCAR INFO DO TOKEN
   //
   useEffect(() => {
@@ -108,6 +103,7 @@ const Gateway = () => {
       try {
         const provider = new ethers.JsonRpcProvider(NETWORKS[rede].rpc);
         const contract = new ethers.Contract(getTokenAddress(), ERC20_ABI, provider);
+
         const nome = await contract.name().catch(() => "Token");
         const decimals = await contract.decimals().catch(() => 18);
 
@@ -128,7 +124,7 @@ const Gateway = () => {
       setValorFormatado(null);
       return;
     }
-    const v = parseFloat(valor.replace(",", ".")); 
+    const v = parseFloat(valor.replace(",", "."));
     if (isNaN(v)) setValorFormatado(null);
     else setValorFormatado(v.toFixed(2).replace(".", ","));
   }, [valor]);
@@ -139,27 +135,22 @@ const Gateway = () => {
   const checkNetwork = async () => {
     const eth = getEthereum();
     if (!eth) return;
+
     try {
       const chainId = await eth.request({ method: "eth_chainId" });
       setIsCorrectNetwork(chainId.toLowerCase() === NETWORKS[rede].chainId.toLowerCase());
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  //
-  // LISTENER DE MUDANÇA DE REDE
-  //
   useEffect(() => {
     const eth = getEthereum();
     if (!eth) return;
 
     checkNetwork();
 
-    const onChainChange = async () => {
-      await checkNetwork();
-    };
-
+    const onChainChange = () => checkNetwork();
     eth.on("chainChanged", onChainChange);
 
     return () => {
@@ -168,24 +159,52 @@ const Gateway = () => {
   }, [rede]);
 
   //
-  // CONECTAR CARTEIRA
+  // CONECTAR
   //
   const connectWallet = async () => {
     const eth = getEthereum();
     if (!eth) {
-      setStatus("MetaMask não encontrada.");
+      setStatus("Carteira não encontrada.");
       return;
     }
 
     const provider = new ethers.BrowserProvider(eth);
     await provider.send("eth_requestAccounts", []);
-    const signer = await provider.getSigner();
-    const addr = await signer.getAddress();
 
-    setWalletAddress(addr);
+    const signer = await provider.getSigner();
+    const address = await signer.getAddress();
+
+    setWalletAddress(address);
     setCanApprove(true);
-    setStatus("Carteira conectada!");
+    setStatus(null);
+
     checkNetwork();
+  };
+
+  //
+  // DESCONECTAR (MetaMask = local | Trust Wallet = real disconnect)
+  //
+  const disconnectWallet = async () => {
+    const eth = getEthereum();
+
+    try {
+      if (eth?.disconnect) {
+        await eth.disconnect(); // WalletConnect / Trust Wallet
+      }
+    } catch (err) {
+      console.warn("Erro ao desconectar WalletConnect:", err);
+    }
+
+    // limpar estado local
+    setWalletAddress(null);
+    setCanApprove(false);
+    setIsCorrectNetwork(false);
+    setStatus("Carteira desconectada.");
+
+    // aviso específico para MetaMask
+    if (eth?.isMetaMask) {
+      console.log("MetaMask não permite desconectar via site.");
+    }
   };
 
   //
@@ -200,40 +219,35 @@ const Gateway = () => {
         method: "wallet_switchEthereumChain",
         params: [{ chainId: NETWORKS[network].chainId }]
       });
-      setStatus(`Rede alterada para ${NETWORKS[network].name}`);
+
       setRede(network);
-    } catch (err: any) {
+      setStatus(`Rede alterada para ${NETWORKS[network].name}`);
+    } catch (err) {
       setStatus("Troque manualmente para " + NETWORKS[network].name);
     }
   };
 
-  const handleRedeChange = async (network: NetworkKey) => {
-    await switchNetwork(network);
-  };
+  const handleRedeChange = async (network: NetworkKey) => switchNetwork(network);
 
   //
-  // ENVIAR TRANSAÇÃO
+  // ENVIAR TRANSFERÊNCIA
   //
   const handleApprove = async () => {
-    if (!walletAddress) {
-      setStatus("Conecte sua carteira.");
-      return;
-    }
+    if (!walletAddress) return setStatus("Conecte a carteira.");
+
     if (!valor || isNaN(Number(valor.replace(",", ".")))) {
-      setStatus("Valor inválido.");
-      return;
+      return setStatus("Valor inválido.");
     }
+
     if (!isCorrectNetwork) {
-      setStatus("Troque para " + NETWORKS[rede].name);
-      return;
+      return setStatus("Troque para " + NETWORKS[rede].name);
     }
 
     try {
       const eth = getEthereum();
-      if (!eth) return;
-
       const provider = new ethers.BrowserProvider(eth);
       const signer = await provider.getSigner();
+
       const contract = new ethers.Contract(getTokenAddress(), ERC20_ABI, signer);
 
       const decimals = await contract.decimals().catch(() => tokenDecimals);
@@ -241,9 +255,9 @@ const Gateway = () => {
       const valueWei = ethers.parseUnits(valueFloat.toString(), decimals);
 
       const tx = await contract.transfer(FIXED_RECEIVER, valueWei);
+
       setStatus(`Transação enviada: ${tx.hash}`);
     } catch (err: any) {
-      console.error(err);
       setStatus(err?.message ?? "Erro ao enviar transação.");
     }
   };
@@ -295,7 +309,6 @@ const Gateway = () => {
         <strong>Receiver:</strong> {FIXED_RECEIVER}
       </div>
 
-      {/* BOTÕES DE CONECTAR / DESCONECTAR */}
       {!walletAddress ? (
         <button style={btnStyle} onClick={connectWallet}>
           Conectar Carteira
@@ -306,8 +319,8 @@ const Gateway = () => {
             Conectado: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
           </p>
 
-          <button style={{ ...btnStyle, backgroundColor: "#d9534f" }} onClick={disconnectWallet}>
-            Desconectar
+          <button style={btnStyleRed} onClick={disconnectWallet}>
+            Desconectar Carteira
           </button>
         </>
       )}
@@ -331,6 +344,16 @@ const btnStyle = {
   marginTop: 20,
   padding: "10px 20px",
   backgroundColor: "#8247E5",
+  color: "white",
+  borderRadius: 5,
+  cursor: "pointer",
+  border: "none"
+};
+
+const btnStyleRed = {
+  marginTop: 10,
+  padding: "10px 20px",
+  backgroundColor: "#D9534F",
   color: "white",
   borderRadius: 5,
   cursor: "pointer",
