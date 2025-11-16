@@ -75,7 +75,8 @@ npm run dev
 
 - **Backend API**: `http://localhost:3001`
 - **Frontend App**: `http://localhost:8080`
-- **Gateway Front**: `http://localhost:3000`
+- **Gateway Front**: `http://localhost:3000` (development)
+- **Gateway Front (Production)**: `https://bnb-hack-five.vercel.app`
 
 ## Features
 
@@ -93,6 +94,7 @@ npm run dev
 - Wallet connection (MetaMask, Trust Wallet)
 - Secure transaction processing
 - Responsive payment interface
+- **Live**: [https://bnb-hack-five.vercel.app](https://bnb-hack-five.vercel.app)
 
 ### Backend API (`backend-binance`)
 - Binance API integration

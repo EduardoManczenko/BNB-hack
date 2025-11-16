@@ -2,6 +2,8 @@
 
 A modern, responsive cryptocurrency payment gateway interface for customers to send USDT or USDC payments across multiple blockchain networks.
 
+**🌐 Live Application**: [https://bnb-hack-five.vercel.app](https://bnb-hack-five.vercel.app)
+
 ## Features
 
 - 🌐 **Multi-Network Support**: BNB Chain, Arbitrum, and Polygon
