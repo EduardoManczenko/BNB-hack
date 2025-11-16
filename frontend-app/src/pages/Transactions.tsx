@@ -6,8 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowUpRight, ArrowDownLeft, Search, Download, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import LoadingDots from "@/components/LoadingDots";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
+import { API_BASE_URL } from "@/config/api";
 
 interface Transaction {
   id: string;

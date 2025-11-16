@@ -3,8 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUpRight, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
+import { API_BASE_URL } from "@/config/api";
 
 // Função para buscar saldo da Binance
 const fetchBalance = async () => {
