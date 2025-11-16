@@ -1,4 +1,4 @@
-# NativeFi Payment Gateway
+# NativeFi
 
 A comprehensive cryptocurrency payment gateway solution with Binance wallet integration, featuring a modern admin dashboard and a customer-facing payment interface.
 
