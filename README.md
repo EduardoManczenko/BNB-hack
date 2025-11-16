@@ -75,7 +75,7 @@ npm run dev
 
 - **Admin Dashboard (Frontend App)**: [https://bnb-hack-cjlu.vercel.app](https://bnb-hack-cjlu.vercel.app)
 - **Payment Gateway (Gateway Front)**: [https://bnb-hack-five.vercel.app](https://bnb-hack-five.vercel.app)
-- **Backend API**: Deployed on Railway (configure your backend URL)
+- **Backend API**: [https://bnb-hack-production.up.railway.app](https://bnb-hack-production.up.railway.app)
 
 ## Local Development Ports
 
@@ -441,10 +441,10 @@ All dependencies are open-source and licensed under various permissive licenses 
 4. **Generate Public Domain**
    - Go to **Settings** → **Networking**
    - Click "Generate Domain"
-   - Copy the public URL (e.g., `https://your-project.up.railway.app`)
+   - Copy the public URL (e.g., `https://bnb-hack-production.up.railway.app`)
 
 5. **Verify Deployment**
-   - Test: `https://your-project.up.railway.app/health`
+   - Test: `https://bnb-hack-production.up.railway.app/health`
    - Should return: `{"status":"ok","message":"Backend is running"}`
 
 **For detailed instructions, see:** [`DEPLOY.md`](./DEPLOY.md) or [`DEPLOY_QUICK_START.md`](./DEPLOY_QUICK_START.md)
@@ -467,7 +467,7 @@ All dependencies are open-source and licensed under various permissive licenses 
    - Go to **Settings** → **Environment Variables**
    - Add:
      ```
-     VITE_API_BASE_URL=https://your-backend.up.railway.app
+     VITE_API_BASE_URL=https://bnb-hack-production.up.railway.app
      ```
    - Enable for: Production, Preview, Development
 
