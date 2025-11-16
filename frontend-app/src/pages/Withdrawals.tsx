@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowDownLeft } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 
 interface WithdrawalTransaction {
   id: string;
@@ -56,7 +56,7 @@ const Withdrawals = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors border border-border gap-4">
               <div className="flex items-center gap-3 md:gap-4">
                 <div className="w-10 h-10 shrink-0 rounded-full flex items-center justify-center bg-success/10 text-success">
-                  <ArrowDownLeft className="w-5 h-5" />
+                  <ArrowUpRight className="w-5 h-5" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
@@ -90,7 +90,7 @@ const Withdrawals = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors border border-border gap-4 opacity-60">
               <div className="flex items-center gap-3 md:gap-4">
                 <div className="w-10 h-10 shrink-0 rounded-full flex items-center justify-center bg-muted text-muted-foreground">
-                  <ArrowDownLeft className="w-5 h-5" />
+                  <ArrowUpRight className="w-5 h-5" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
