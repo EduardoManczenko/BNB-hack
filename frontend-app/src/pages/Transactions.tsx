@@ -21,6 +21,32 @@ interface Transaction {
   hash: string;
 }
 
+// Mock transactions for vendor payments
+const mockVendorTransactions: Transaction[] = [
+  {
+    id: "mock-vendor-1",
+    type: "incoming",
+    amount: 100,
+    amountInUSD: 100,
+    currency: "USDT",
+    network: "BSC",
+    status: "confirmed",
+    date: "2024-10-20 14:30",
+    hash: "0xabc123...def456"
+  },
+  {
+    id: "mock-vendor-2",
+    type: "incoming",
+    amount: 50,
+    amountInUSD: 50,
+    currency: "USDC",
+    network: "Arbitrum",
+    status: "confirmed",
+    date: "2024-10-21 10:15",
+    hash: "0x789abc...123def"
+  }
+];
+
 // Função para buscar transações da API
 const fetchTransactions = async (): Promise<Transaction[]> => {
   const response = await fetch(`${API_BASE_URL}/api/transactions`);
@@ -29,7 +55,8 @@ const fetchTransactions = async (): Promise<Transaction[]> => {
   }
   const data = await response.json();
   if (data.success) {
-    return data.transactions;
+    // Merge API transactions with mock vendor transactions
+    return [...data.transactions, ...mockVendorTransactions];
   }
   throw new Error(data.error || "Failed to fetch transactions");
 };
