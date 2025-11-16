@@ -2,6 +2,11 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { ethers } from "ethers";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 
 // ABI mínima para ERC20
 const ERC20_ABI = [
@@ -56,16 +61,12 @@ const NETWORKS: Record<
 
 const FIXED_RECEIVER = "0xed14922507cee9938faaf2958d577a2aeea9c4e7";
 
-//
-// 🔥 Função essencial para MetaMask/Trust Wallet Mobile
-//
 function getEthereum() {
   if (typeof window === "undefined") return null;
   const eth = window.ethereum;
 
   if (eth?.isMetaMask) return eth;
 
-  // detecta múltiplos providers (MetaMask + Trust Wallet Mobile)
   if (Array.isArray(eth?.providers)) {
     const mm = eth.providers.find((p: any) => p.isMetaMask);
     const tw = eth.providers.find((p: any) => p.isTrust || p.isWalletConnect);
@@ -76,9 +77,6 @@ function getEthereum() {
   return eth ?? null;
 }
 
-//
-// COMPONENTE PRINCIPAL
-//
 const Gateway = () => {
   const [status, setStatus] = useState<string | null>(null);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
@@ -95,14 +93,12 @@ const Gateway = () => {
 
   const getTokenAddress = (): string => NETWORKS[rede].tokens[token];
 
-  //
-  // BUSCAR INFO DO TOKEN
-  //
   useEffect(() => {
     const fetchTokenInfo = async () => {
       try {
         const provider = new ethers.JsonRpcProvider(NETWORKS[rede].rpc);
-        const contract = new ethers.Contract(getTokenAddress(), ERC20_ABI, provider);
+        const tokenAddress = NETWORKS[rede].tokens[token];
+        const contract = new ethers.Contract(tokenAddress, ERC20_ABI, provider);
 
         const nome = await contract.name().catch(() => "Token");
         const decimals = await contract.decimals().catch(() => 18);
@@ -116,9 +112,6 @@ const Gateway = () => {
     fetchTokenInfo();
   }, [rede, token]);
 
-  //
-  // FORMATAÇÃO DO VALOR
-  //
   useEffect(() => {
     if (!valor) {
       setValorFormatado(null);
@@ -129,9 +122,6 @@ const Gateway = () => {
     else setValorFormatado(v.toFixed(2).replace(".", ","));
   }, [valor]);
 
-  //
-  // CHECAR REDE
-  //
   const checkNetwork = async () => {
     const eth = getEthereum();
     if (!eth) return;
@@ -158,9 +148,6 @@ const Gateway = () => {
     };
   }, [rede]);
 
-  //
-  // CONECTAR
-  //
   const connectWallet = async () => {
     const eth = getEthereum();
     if (!eth) {
@@ -181,35 +168,27 @@ const Gateway = () => {
     checkNetwork();
   };
 
-  //
-  // DESCONECTAR (MetaMask = local | Trust Wallet = real disconnect)
-  //
   const disconnectWallet = async () => {
     const eth = getEthereum();
 
     try {
       if (eth?.disconnect) {
-        await eth.disconnect(); // WalletConnect / Trust Wallet
+        await eth.disconnect();
       }
     } catch (err) {
       console.warn("Erro ao desconectar WalletConnect:", err);
     }
 
-    // limpar estado local
     setWalletAddress(null);
     setCanApprove(false);
     setIsCorrectNetwork(false);
     setStatus("Carteira desconectada.");
 
-    // aviso específico para MetaMask
     if (eth?.isMetaMask) {
       console.log("MetaMask não permite desconectar via site.");
     }
   };
 
-  //
-  // TROCAR DE REDE
-  //
   const switchNetwork = async (network: NetworkKey) => {
     const eth = getEthereum();
     if (!eth) return;
@@ -229,9 +208,6 @@ const Gateway = () => {
 
   const handleRedeChange = async (network: NetworkKey) => switchNetwork(network);
 
-  //
-  // ENVIAR TRANSFERÊNCIA
-  //
   const handleApprove = async () => {
     if (!walletAddress) return setStatus("Conecte a carteira.");
 
@@ -262,106 +238,153 @@ const Gateway = () => {
     }
   };
 
-  //
-  // UI
-  //
   return (
-    <div style={{ fontFamily: "Arial", padding: 20 }}>
-      <h1>Pagamento</h1>
+    <div className="min-h-screen bg-gradient-subtle flex items-center justify-center p-4 md:p-6">
+      <div className="w-full max-w-2xl">
+        <Card className="shadow-elevated border-border">
+          <CardHeader className="text-center">
+            <img 
+              src="/nativefi.svg" 
+              alt="NativeFi" 
+              className="h-12 w-auto mx-auto mb-4"
+              />
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Network Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="network" className="text-sm font-semibold">Network</Label>
+              <Select
+                id="network"
+                value={rede}
+                onChange={(e) => handleRedeChange(e.target.value as NetworkKey)}
+                className="w-full"
+              >
+                {Object.keys(NETWORKS).map((k) => (
+                  <option key={k} value={k}>
+                    {NETWORKS[k as NetworkKey].name}
+                  </option>
+                ))}
+              </Select>
+            </div>
 
-      <div>
-        <label>Rede:</label>
-        <select value={rede} onChange={(e) => handleRedeChange(e.target.value as NetworkKey)}>
-          {Object.keys(NETWORKS).map((k) => (
-            <option key={k} value={k}>
-              {NETWORKS[k as NetworkKey].name}
-            </option>
-          ))}
-        </select>
+            {/* Token Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="token" className="text-sm font-semibold">Token</Label>
+              <Select
+                id="token"
+                value={token}
+                onChange={(e) => setToken(e.target.value as TokenKey)}
+                className="w-full"
+              >
+                {Object.keys(NETWORKS[rede].tokens).map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </Select>
+            </div>
+
+            {/* Amount Input */}
+            <div className="space-y-2">
+              <Label htmlFor="amount" className="text-sm font-semibold">Amount</Label>
+              <div className="flex items-center gap-3">
+                <Input
+                  id="amount"
+                  type="text"
+                  value={valor}
+                  onChange={(e) => setValor(e.target.value)}
+                  placeholder="0.00"
+                  className="flex-1"
+                />
+                {valorFormatado && tokenName && (
+                  <div className="text-sm font-semibold text-muted-foreground whitespace-nowrap">
+                    {valorFormatado} {tokenName}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Receiver Address */}
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">Receiver Address</Label>
+              <div className="p-3 rounded-md bg-muted/50 border border-border text-sm font-mono break-all">
+                {FIXED_RECEIVER}
+              </div>
+            </div>
+
+            {/* Wallet Connection */}
+            {!walletAddress ? (
+              <Button
+                onClick={connectWallet}
+                className="w-full"
+                size="lg"
+              >
+                Connect Wallet
+              </Button>
+            ) : (
+              <div className="space-y-3">
+                <div className="p-4 rounded-lg bg-success/10 border border-success/20">
+                  <p className="text-sm font-semibold text-success mb-1">Wallet Connected</p>
+                  <p className="text-xs text-muted-foreground font-mono">
+                    {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+                  </p>
+                </div>
+
+                {!isCorrectNetwork && (
+                  <div className="p-4 rounded-lg bg-warning/10 border border-warning/20">
+                    <p className="text-sm font-semibold text-warning mb-1">Wrong Network</p>
+                    <p className="text-xs text-muted-foreground">
+                      Please switch to {NETWORKS[rede].name}
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  <Button
+                    onClick={disconnectWallet}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    Disconnect
+                  </Button>
+                  {canApprove && isCorrectNetwork && (
+                    <Button
+                      onClick={handleApprove}
+                      className="flex-1"
+                      size="lg"
+                    >
+                      Confirm Transaction
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Status Message */}
+            {status && (
+              <div
+                className={`p-4 rounded-lg border ${
+                  status.includes("Erro") || status.includes("inválido") || status.includes("não encontrada")
+                    ? "bg-destructive/10 border-destructive/20 text-destructive"
+                    : "bg-success/10 border-success/20 text-success"
+                }`}
+              >
+                <p className="text-sm font-medium">{status}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
-
-      <div style={{ marginTop: 10 }}>
-        <label>Token:</label>
-        <select value={token} onChange={(e) => setToken(e.target.value as TokenKey)}>
-          {Object.keys(NETWORKS[rede].tokens).map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div style={{ marginTop: 10 }}>
-        <label>Valor:</label>
-        <input
-          type="text"
-          value={valor}
-          onChange={(e) => setValor(e.target.value)}
-          placeholder="0,00"
-          style={{ marginLeft: 10, padding: 5, width: 120 }}
-        />
-        <span style={{ marginLeft: 10, fontWeight: "bold" }}>
-          {valorFormatado && tokenName ? `${valorFormatado} ${tokenName}` : ""}
-        </span>
-      </div>
-
-      <div style={{ marginTop: 10 }}>
-        <strong>Receiver:</strong> {FIXED_RECEIVER}
-      </div>
-
-      {!walletAddress ? (
-        <button style={btnStyle} onClick={connectWallet}>
-          Conectar Carteira
-        </button>
-      ) : (
-        <>
-          <p style={{ color: "green" }}>
-            Conectado: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
-          </p>
-
-          <button style={btnStyleRed} onClick={disconnectWallet}>
-            Desconectar Carteira
-          </button>
-        </>
-      )}
-
-      {walletAddress && canApprove && (
-        <button style={btnStyle} onClick={handleApprove}>
-          Confirmar Transação
-        </button>
-      )}
-
-      {status && (
-        <p style={{ marginTop: 20, color: status.includes("Erro") ? "red" : "green" }}>
-          {status}
-        </p>
-      )}
     </div>
   );
 };
 
-const btnStyle = {
-  marginTop: 20,
-  padding: "10px 20px",
-  backgroundColor: "#8247E5",
-  color: "white",
-  borderRadius: 5,
-  cursor: "pointer",
-  border: "none"
-};
-
-const btnStyleRed = {
-  marginTop: 10,
-  padding: "10px 20px",
-  backgroundColor: "#D9534F",
-  color: "white",
-  borderRadius: 5,
-  cursor: "pointer",
-  border: "none"
-};
-
 const Home = () => (
-  <Suspense fallback={<div>Carregando...</div>}>
+  <Suspense fallback={
+    <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
+      <div className="text-muted-foreground">Loading...</div>
+    </div>
+  }>
     <Gateway />
   </Suspense>
 );
