@@ -37,9 +37,7 @@ const Login = () => {
             src="/nativefi.svg" 
             alt="NativeFi" 
             className="h-16 w-auto mx-auto mb-4"
-          />
-          <h1 className="text-3xl font-bold text-foreground mb-2">NativeFi</h1>
-          <p className="text-muted-foreground">Crypto Payment Gateway</p>
+          />          
         </div>
 
         <Card className="shadow-elevated border-border">
