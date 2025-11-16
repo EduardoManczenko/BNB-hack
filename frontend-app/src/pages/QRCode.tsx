@@ -1,28 +1,16 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Download, Share2, Copy, CheckCircle } from "lucide-react";
+import { Download, Share2 } from "lucide-react";
 import merchantQR from "@/assets/merchant-qr.png";
-import { useState } from "react";
 import { toast } from "sonner";
 
 const QRCode = () => {
-  const [copied, setCopied] = useState(false);
-  const walletAddress = "0x742d35f8c9e...3a1f9b2c";
-
-  const handleCopyAddress = () => {
-    navigator.clipboard.writeText(walletAddress);
-    setCopied(true);
-    toast.success("Address copied to clipboard!");
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   const handleShare = async () => {
     if (navigator.share) {
       try {
         await navigator.share({
           title: 'NativeFi Payment QR Code',
-          text: `Pay with crypto: ${walletAddress}`,
+          text: 'Pay with crypto using this QR code',
         });
       } catch (err) {
         console.log('Error sharing:', err);
@@ -53,37 +41,6 @@ const QRCode = () => {
                 alt="Merchant Payment QR Code" 
                 className="w-64 h-64 md:w-80 md:h-80"
               />
-            </div>
-
-            {/* Supported Networks */}
-            <div className="w-full">
-              <p className="text-xs text-muted-foreground mb-2 text-center">Supported Networks:</p>
-              <div className="flex flex-wrap gap-2 justify-center">
-                <Badge variant="outline" className="bg-primary/5">BSC</Badge>
-                <Badge variant="outline" className="bg-primary/5">Ethereum</Badge>
-                <Badge variant="outline" className="bg-primary/5">Polygon</Badge>
-                <Badge variant="outline" className="bg-primary/5">Arbitrum</Badge>
-              </div>
-            </div>
-
-            {/* Wallet Address */}
-            <div className="w-full space-y-2">
-              <p className="text-xs text-muted-foreground text-center">Wallet Address:</p>
-              <div className="flex items-center gap-2 bg-muted/30 p-3 rounded-lg">
-                <code className="text-xs flex-1 text-center break-all">{walletAddress}</code>
-                <Button 
-                  size="sm" 
-                  variant="ghost"
-                  onClick={handleCopyAddress}
-                  className="shrink-0"
-                >
-                  {copied ? (
-                    <CheckCircle className="w-4 h-4 text-success" />
-                  ) : (
-                    <Copy className="w-4 h-4" />
-                  )}
-                </Button>
-              </div>
             </div>
 
             {/* Action Buttons */}

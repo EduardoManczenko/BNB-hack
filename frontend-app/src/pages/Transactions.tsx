@@ -1,15 +1,19 @@
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUpRight, ArrowDownLeft, Search, Download } from "lucide-react";
+import { ArrowUpRight, ArrowDownLeft, Search, Download, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import LoadingDots from "@/components/LoadingDots";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
 
 interface Transaction {
   id: string;
   type: "incoming" | "outgoing";
   amount: number;
+  amountInUSD: number | null;
   currency: string;
   network: string;
   status: "confirmed" | "pending" | "processing";
@@ -17,61 +21,28 @@ interface Transaction {
   hash: string;
 }
 
-const mockTransactions: Transaction[] = [
-  {
-    id: "1",
-    type: "incoming",
-    amount: 150.00,
-    currency: "USDC",
-    network: "BSC",
-    status: "confirmed",
-    date: "2025-01-15 14:32",
-    hash: "0x742d...3a1f"
-  },
-  {
-    id: "2",
-    type: "incoming",
-    amount: 75.50,
-    currency: "USDT",
-    network: "Polygon",
-    status: "pending",
-    date: "2025-01-15 12:18",
-    hash: "0x8b3c...7d2e"
-  },
-  {
-    id: "3",
-    type: "outgoing",
-    amount: 500.00,
-    currency: "BRL",
-    network: "Off-ramp",
-    status: "processing",
-    date: "2025-01-14 16:45",
-    hash: "0x9f1a...4c8b"
-  },
-  {
-    id: "4",
-    type: "incoming",
-    amount: 220.00,
-    currency: "USDC",
-    network: "Ethereum",
-    status: "confirmed",
-    date: "2025-01-14 10:23",
-    hash: "0x5e7d...9b4f"
-  },
-  {
-    id: "5",
-    type: "incoming",
-    amount: 89.99,
-    currency: "USDT",
-    network: "BSC",
-    status: "confirmed",
-    date: "2025-01-13 18:56",
-    hash: "0x3c2b...6a5d"
+// Função para buscar transações da API
+const fetchTransactions = async (): Promise<Transaction[]> => {
+  const response = await fetch(`${API_BASE_URL}/api/transactions`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch transactions");
   }
-];
+  const data = await response.json();
+  if (data.success) {
+    return data.transactions;
+  }
+  throw new Error(data.error || "Failed to fetch transactions");
+};
 
 const Transactions = () => {
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Buscar transações da API
+  const { data: transactions = [], isLoading, error } = useQuery({
+    queryKey: ["transactions"],
+    queryFn: fetchTransactions,
+    refetchInterval: 30000, // Atualizar a cada 30 segundos
+  });
 
   const getStatusBadge = (status: Transaction["status"]) => {
     switch (status) {
@@ -94,25 +65,37 @@ const Transactions = () => {
     }
   };
 
-  const filteredTransactions = mockTransactions.filter(tx =>
-    tx.hash.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tx.currency.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tx.network.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredTransactions = transactions
+    .filter(tx =>
+      tx.currency.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tx.network.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      // Ordenar por data em ordem decrescente (mais recente primeiro)
+      // Formato da data: "YYYY-MM-DD HH:mm"
+      const parseDate = (dateStr: string) => {
+        const [datePart, timePart] = dateStr.split(' ');
+        const [year, month, day] = datePart.split('-').map(Number);
+        const [hour, minute] = timePart.split(':').map(Number);
+        return new Date(year, month - 1, day, hour, minute).getTime();
+      };
+      
+      const dateA = parseDate(a.date);
+      const dateB = parseDate(b.date);
+      return dateB - dateA; // Ordem decrescente
+    });
 
   return (
     <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       <div>
         <h1 className="text-2xl md:text-3xl font-bold text-foreground">Transaction History</h1>
-        <p className="text-sm text-muted-foreground">Complete list of all transactions</p>
       </div>
 
       <Card className="shadow-card border-border">
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <CardTitle className="text-lg md:text-xl">All Transactions</CardTitle>
-              <CardDescription className="text-xs md:text-sm">Filter and export your transaction history</CardDescription>
+              <CardDescription className="text-xs md:text-sm">Filter and export your transaction history from the last 90 days</CardDescription>
             </div>
             <Button variant="outline" size="sm" className="w-fit">
               <Download className="w-4 h-4 mr-2" />
@@ -123,7 +106,7 @@ const Transactions = () => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search by hash, currency or network..."
+                placeholder="Search by currency or network..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -132,48 +115,69 @@ const Transactions = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {filteredTransactions.map((tx) => (
-              <div
-                key={tx.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors border border-border gap-4"
-              >
-                <div className="flex items-center gap-3 md:gap-4">
-                  <div className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center ${
-                    tx.type === "incoming" 
-                      ? "bg-success/10 text-success" 
-                      : "bg-primary/10 text-primary"
-                  }`}>
-                    {tx.type === "incoming" ? (
-                      <ArrowDownLeft className="w-5 h-5" />
-                    ) : (
-                      <ArrowUpRight className="w-5 h-5" />
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+              <span className="ml-2 text-muted-foreground">Loading transactions...</span>
+            </div>
+          ) : error ? (
+            <div className="flex items-center justify-center py-8">
+              <span className="text-destructive">Error loading transactions</span>
+            </div>
+          ) : filteredTransactions.length === 0 ? (
+            <div className="flex items-center justify-center py-8">
+              <span className="text-muted-foreground">No transactions found</span>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filteredTransactions.map((tx) => (
+                <div
+                  key={tx.id}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors border border-border gap-4"
+                >
+                  <div className="flex items-center gap-3 md:gap-4">
+                    <div className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center ${
+                      tx.type === "incoming" 
+                        ? "bg-success/10 text-success" 
+                        : "bg-primary/10 text-primary"
+                    }`}>
+                      {tx.type === "incoming" ? (
+                        <ArrowDownLeft className="w-5 h-5" />
+                      ) : (
+                        <ArrowUpRight className="w-5 h-5" />
+                      )}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="font-semibold text-foreground">
+                          {tx.type === "incoming" ? "Incoming" : "Withdrawal"}
+                        </p>
+                        {getStatusBadge(tx.status)}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {tx.network} • {tx.date}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className={`text-base md:text-lg font-bold ${
+                      tx.type === "incoming" ? "text-success" : "text-foreground"
+                    }`}>
+                      {tx.amountInUSD !== null 
+                        ? `${tx.type === "incoming" ? "+" : "-"}$${tx.amountInUSD.toFixed(2)}`
+                        : `${tx.type === "incoming" ? "+" : "-"}${tx.amount.toFixed(2)} ${tx.currency}`
+                      }
+                    </p>
+                    {tx.amountInUSD !== null && (
+                      <p className="text-xs md:text-sm text-muted-foreground">
+                        {tx.amount.toFixed(4)} {tx.currency}
+                      </p>
                     )}
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="font-semibold text-foreground">
-                        {tx.type === "incoming" ? "Incoming" : "Withdrawal"}
-                      </p>
-                      {getStatusBadge(tx.status)}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {tx.network} • {tx.date}
-                    </p>
-                    <code className="text-xs text-muted-foreground">{tx.hash}</code>
-                  </div>
                 </div>
-                <div className="text-right">
-                  <p className={`text-base md:text-lg font-bold ${
-                    tx.type === "incoming" ? "text-success" : "text-foreground"
-                  }`}>
-                    {tx.type === "incoming" ? "+" : "-"}${tx.amount.toFixed(2)}
-                  </p>
-                  <p className="text-xs md:text-sm text-muted-foreground">{tx.currency}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

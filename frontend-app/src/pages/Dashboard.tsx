@@ -1,9 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, LogOut, ArrowRight, Loader2 } from "lucide-react";
+import { TrendingUp, ArrowRight, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import merchantQR from "@/assets/merchant-qr.png";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
 
@@ -12,6 +11,15 @@ const fetchBalance = async () => {
   const response = await fetch(`${API_BASE_URL}/api/balance`);
   if (!response.ok) {
     throw new Error("Failed to fetch balance");
+  }
+  return response.json();
+};
+
+// Função para buscar depósitos do dia atual da Binance
+const fetchTodayDeposits = async () => {
+  const response = await fetch(`${API_BASE_URL}/api/deposits/today`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch today deposits");
   }
   return response.json();
 };
@@ -26,26 +34,23 @@ const Dashboard = () => {
     refetchInterval: 30000, // Atualizar a cada 30 segundos
   });
 
-  const totalBalance = balanceData?.success ? parseFloat(balanceData.totalBalance) : 0;
-  const totalToday = 225.50;
+  // Buscar depósitos do dia atual
+  const { 
+    data: depositsData, 
+    isLoading: isLoadingDeposits, 
+    error: depositsError 
+  } = useQuery({
+    queryKey: ["deposits-today"],
+    queryFn: fetchTodayDeposits,
+    refetchInterval: 30000, // Atualizar a cada 30 segundos
+  });
 
-  const handleLogout = () => {
-    navigate("/");
-  };
+  const totalBalance = balanceData?.success ? parseFloat(balanceData.totalBalance) : 0;
+  const totalToday = depositsData?.success ? parseFloat(depositsData.totalToday) : 0;
+  const transactionCount = depositsData?.success ? depositsData.count : 0;
 
   return (
     <div className="p-4 md:p-6 space-y-4 md:space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-sm text-muted-foreground">Overview of your payment gateway</p>
-        </div>
-        <Button variant="outline" size="sm" onClick={handleLogout} className="w-fit">
-          <LogOut className="w-4 h-4 mr-2" />
-          Logout
-        </Button>
-      </div>
-
       {/* Balance Cards */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         <Card className="shadow-card border-border">
@@ -78,19 +83,29 @@ const Dashboard = () => {
           <CardHeader className="pb-3">
             <CardDescription className="text-xs">Received Today</CardDescription>
             <CardTitle className="text-2xl md:text-3xl font-bold">
-              ${totalToday.toFixed(2)}
+              {isLoadingDeposits ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Loading...</span>
+                </div>
+              ) : depositsError ? (
+                <span className="text-destructive">Error loading deposits</span>
+              ) : (
+                `$${totalToday.toFixed(2)}`
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-xs md:text-sm text-muted-foreground">
-              3 transactions
-            </div>
+            {!isLoadingDeposits && !depositsError && (
+              <div className="text-xs md:text-sm text-muted-foreground">
+                {transactionCount} {transactionCount === 1 ? 'transaction' : 'transactions'}
+              </div>
+            )}
           </CardContent>
         </Card>
 
         <Card className="shadow-card border-border sm:col-span-2 lg:col-span-1">
           <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Quick Access</CardDescription>
             <CardTitle className="text-lg">Payment QR Code</CardTitle>
           </CardHeader>
           <CardContent>
