@@ -1,56 +1,55 @@
-# Como Obter URL Pública do Railway
+# How to Get Public URL from Railway
 
-A URL `bnb-hack.railway.internal` é uma URL **interna** do Railway e não funciona para acessar de fora.
+The URL `bnb-hack.railway.internal` is an **internal** Railway URL and cannot be accessed from outside.
 
-## Passo a Passo para Gerar URL Pública
+## Step-by-Step Guide to Generate Public URL
 
-### 1. No Dashboard do Railway
+### 1. In Railway Dashboard
 
-1. Acesse [railway.app](https://railway.app)
-2. Clique no seu projeto `backend-binance`
-3. Vá na aba **Settings** (ou clique no serviço)
-4. Role até a seção **Networking** ou **Domains**
+1. Go to [railway.app](https://railway.app)
+2. Click on your `backend-binance` project
+3. Go to the **Settings** tab (or click on the service)
+4. Scroll to the **Networking** or **Domains** section
 
-### 2. Gerar Domínio Público
+### 2. Generate Public Domain
 
-Você tem duas opções:
+You have two options:
 
-#### Opção A: Domínio Railway (Gratuito)
-1. Na seção **Networking**, procure por **"Generate Domain"** ou **"Public Domain"**
-2. Clique em **"Generate Domain"** ou **"Create Public Domain"**
-3. O Railway vai gerar uma URL como: `https://seu-projeto-production.up.railway.app`
-4. **Copie essa URL** - essa é a que você vai usar no frontend!
+#### Option A: Railway Domain (Free)
+1. In the **Networking** section, look for **"Generate Domain"** or **"Public Domain"**
+2. Click **"Generate Domain"** or **"Create Public Domain"**
+3. Railway will generate a URL like: `https://your-project-production.up.railway.app`
+4. **Copy this URL** - this is the one you'll use in the frontend!
 
-#### Opção B: Domínio Customizado (Opcional)
-1. Você pode adicionar seu próprio domínio
-2. Mas para começar, use o domínio do Railway (Opção A)
+#### Option B: Custom Domain (Optional)
+1. You can add your own domain
+2. But to start, use the Railway domain (Option A)
 
-### 3. Verificar se está funcionando
+### 3. Verify it's working
 
-Teste a URL pública no navegador:
-- `https://sua-url.railway.app/health`
-- Deve retornar: `{"status":"ok","message":"Backend is running"}`
+Test the public URL in your browser:
+- `https://your-url.railway.app/health`
+- Should return: `{"status":"ok","message":"Backend is running"}`
 
-### 4. Usar no Frontend
+### 4. Use in Frontend
 
-Quando tiver a URL pública, use ela no Vercel:
+When you have the public URL, use it in Vercel:
 
 ```
-VITE_API_BASE_URL=https://sua-url.railway.app
+VITE_API_BASE_URL=https://your-url.railway.app
 ```
 
-## Exemplo
+## Example
 
-Se sua URL pública for: `https://backend-binance-production.up.railway.app`
+If your public URL is: `https://backend-binance-production.up.railway.app`
 
-No Vercel, configure:
+In Vercel, configure:
 ```
 VITE_API_BASE_URL=https://backend-binance-production.up.railway.app
 ```
 
-## Importante
+## Important
 
-- A URL `.railway.internal` é apenas para comunicação interna
-- Você precisa de uma URL pública (`.up.railway.app` ou domínio customizado)
-- A URL pública é gratuita no Railway
-
+- The `.railway.internal` URL is only for internal communication
+- You need a public URL (`.up.railway.app` or custom domain)
+- The public URL is free on Railway

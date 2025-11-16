@@ -1,25 +1,25 @@
-# Passos para Deploy Completo
+# Complete Deployment Steps
 
-## ✅ Backend no Railway (Já feito!)
+## ✅ Backend on Railway (Already done!)
 
-Seu backend já está rodando no Railway. Anote a URL:
-- **Backend URL**: `https://seu-projeto.railway.app`
+Your backend is already running on Railway. Note the URL:
+- **Backend URL**: `https://your-project.railway.app`
 
 ---
 
-## 🎨 Frontend App no Vercel
+## 🎨 Frontend App on Vercel
 
-### Passo 1: Obter URL do Backend
+### Step 1: Get Backend URL
 
-1. Acesse [railway.app](https://railway.app)
-2. Vá no seu projeto
-3. Em **Settings** → **Networking**, copie a URL (ou gere um domínio se ainda não tiver)
+1. Go to [railway.app](https://railway.app)
+2. Go to your project
+3. In **Settings** → **Networking**, copy the URL (or generate a domain if you don't have one yet)
 
-### Passo 2: Deploy no Vercel
+### Step 2: Deploy to Vercel
 
-1. Acesse [vercel.com](https://vercel.com) e faça login
+1. Go to [vercel.com](https://vercel.com) and log in
 
-2. **Add New Project** → Importe o repositório `BNB-hack`
+2. **Add New Project** → Import the `BNB-hack` repository
 
 3. Configure:
    - **Root Directory**: `frontend-app`
@@ -27,21 +27,21 @@ Seu backend já está rodando no Railway. Anote a URL:
    - **Build Command**: `npm run build`
    - **Output Directory**: `dist`
 
-4. **Environment Variables** (IMPORTANTE!):
+4. **Environment Variables** (IMPORTANT!):
    ```
-   VITE_API_BASE_URL=https://seu-projeto.railway.app
+   VITE_API_BASE_URL=https://your-project.railway.app
    ```
-   (Substitua pela URL real do seu backend no Railway)
+   (Replace with the actual URL of your backend on Railway)
 
-5. Clique em **Deploy**
+5. Click **Deploy**
 
-6. Aguarde o build e copie a URL gerada
+6. Wait for the build and copy the generated URL
 
-### Passo 3: Testar
+### Step 3: Test
 
-1. Acesse a URL do Vercel
-2. Faça login
-3. Verifique se o Dashboard carrega os dados do backend
+1. Access the Vercel URL
+2. Log in
+3. Verify that the Dashboard loads data from the backend
 
 ---
 
@@ -53,9 +53,8 @@ Seu backend já está rodando no Railway. Anote a URL:
 
 ---
 
-## 🔄 Deploy Automático
+## 🔄 Automatic Deployment
 
-Tanto Railway quanto Vercel fazem deploy automático quando você faz push no GitHub!
+Both Railway and Vercel automatically deploy when you push to GitHub!
 
-**Importante**: Sempre que mudar a URL do backend, atualize a variável `VITE_API_BASE_URL` no Vercel.
-
+**Important**: Whenever you change the backend URL, update the `VITE_API_BASE_URL` variable in Vercel.

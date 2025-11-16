@@ -1,56 +1,48 @@
-# Configuração de Portas
+# Port Configuration
 
-## Portas Atuais
+## Current Ports
 
-- **Frontend (Vite)**: Porta `8080`
-  - Arquivo: `frontend-app/vite.config.ts`
+- **Frontend (Vite)**: Port `8080`
+  - File: `frontend-app/vite.config.ts`
   - URL: http://localhost:8080
 
-- **Backend (Express)**: Porta `3001`
-  - Arquivo: `backend-binance/server.js`
+- **Backend (Express)**: Port `3001`
+  - File: `backend-binance/server.js`
   - URL: http://localhost:3001
 
 ## ✅ Status
 
-As portas estão configuradas corretamente e **NÃO estão em conflito**.
+The ports are configured correctly and **are NOT in conflict**.
 
-## 🔧 Como Alterar as Portas (se necessário)
+## 🔧 How to Change Ports (if needed)
 
-### Alterar Porta do Frontend
+### Change Frontend Port
 
-Edite `frontend-app/vite.config.ts`:
+Edit `frontend-app/vite.config.ts`:
 ```typescript
 server: {
   host: "::",
-  port: 8080,  // Altere para outra porta (ex: 3000, 5173, 8081)
+  port: 8080,  // Change to another port (e.g., 3000, 5173, 8081)
 },
 ```
 
-### Alterar Porta do Backend
+### Change Backend Port
 
-Opção 1: Edite o arquivo `.env` em `backend-binance/`:
+Option 1: Edit the `.env` file in `backend-binance/`:
 ```
-PORT=3001  # Altere para outra porta (ex: 3002, 4000, 5000)
+PORT=3001  # Change to another port (e.g., 3002, 4000, 5000)
 ```
 
-Opção 2: Edite `backend-binance/server.js`:
+Option 2: Edit `backend-binance/server.js`:
 ```javascript
-const PORT = process.env.PORT || 3001;  // Altere o 3001 padrão
+const PORT = process.env.PORT || 3001;  // Change the default 3001
 ```
 
-## ⚠️ Importante
+## ⚠️ Important
 
-Se alterar a porta do backend, também atualize no frontend:
+If you change the backend port, also update it in the frontend:
 
-Edite `frontend-app/src/pages/Dashboard.tsx`:
-```typescript
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
-//                                                                      ^^^^
-//                                                          Altere para a nova porta
-```
-
-Ou crie um arquivo `.env` em `frontend-app/`:
+Edit `frontend-app/src/config/api.ts` or create a `.env` file in `frontend-app/`:
 ```
 VITE_API_BASE_URL=http://localhost:3001
 ```
-

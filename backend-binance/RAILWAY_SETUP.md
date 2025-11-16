@@ -1,48 +1,47 @@
 # Railway Setup Guide
 
-## Configuração no Railway
+## Configuration on Railway
 
-Se você está tendo o erro `Missing script: "build"`, siga estes passos:
+If you're getting the error `Missing script: "build"`, follow these steps:
 
-### 1. No Dashboard do Railway
+### 1. In Railway Dashboard
 
-Quando criar o projeto, configure:
+When creating the project, configure:
 
 **Settings → Build & Deploy:**
 
-- **Build Command**: Deixe vazio ou use `npm install`
+- **Build Command**: Leave empty or use `npm install`
 - **Start Command**: `npm start`
-- **Root Directory**: `backend-binance` (se estiver na raiz do repo)
+- **Root Directory**: `backend-binance` (if at the root of the repo)
 
-**OU** simplesmente deixe o Railway detectar automaticamente (ele deve detectar Node.js).
+**OR** simply let Railway auto-detect (it should detect Node.js).
 
-### 2. Variáveis de Ambiente
+### 2. Environment Variables
 
-Vá em **Variables** e adicione:
+Go to **Variables** and add:
 
 ```
 PORT=3001
-BINANCE_API_KEY=sua_chave_aqui
-BINANCE_API_SECRET=seu_secret_aqui
+BINANCE_API_KEY=your_key_here
+BINANCE_API_SECRET=your_secret_here
 ```
 
-### 3. Se ainda der erro
+### 3. If you still get an error
 
-No Railway, vá em **Settings → Build & Deploy** e:
+In Railway, go to **Settings → Build & Deploy** and:
 
-1. **Desmarque** "Build Command" ou deixe vazio
+1. **Uncheck** "Build Command" or leave it empty
 2. **Start Command**: `npm start`
-3. Salve e faça um novo deploy
+3. Save and redeploy
 
-### 4. Alternativa: Usar Nixpacks
+### 4. Alternative: Use Nixpacks
 
-O arquivo `nixpacks.toml` já está configurado. O Railway deve detectá-lo automaticamente.
+The `nixpacks.toml` file is already configured. Railway should detect it automatically.
 
-## Verificação
+## Verification
 
-Após o deploy, verifique se está funcionando:
+After deployment, verify it's working:
 
-1. Acesse a URL do Railway (ex: `https://seu-projeto.railway.app`)
-2. Teste o endpoint: `https://seu-projeto.railway.app/health`
-3. Deve retornar: `{"status":"ok","message":"Backend is running"}`
-
+1. Access the Railway URL (e.g., `https://your-project.railway.app`)
+2. Test the endpoint: `https://your-project.railway.app/health`
+3. Should return: `{"status":"ok","message":"Backend is running"}`

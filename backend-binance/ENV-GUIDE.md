@@ -1,80 +1,79 @@
-# Guia de Configuração do .env
+# .env Configuration Guide
 
-## Formato Correto do Arquivo .env
+## Correct .env File Format
 
-Seu arquivo `.env` deve estar na pasta `backend-binance` e ter este formato:
+Your `.env` file should be in the `backend-binance` folder and have this format:
 
 ```
-BINANCE_API_KEY=sua_api_key_aqui
-BINANCE_API_SECRET=sua_api_secret_aqui
+BINANCE_API_KEY=your_api_key_here
+BINANCE_API_SECRET=your_api_secret_here
 PORT=3001
 ```
 
-## ✅ Checklist de Verificação
+## ✅ Verification Checklist
 
-1. **Arquivo existe?**
-   - O arquivo deve se chamar exatamente `.env` (com o ponto no início)
-   - Deve estar na pasta `backend-binance`
+1. **File exists?**
+   - The file must be named exactly `.env` (with the dot at the beginning)
+   - Must be in the `backend-binance` folder
 
-2. **Formato correto?**
-   - Cada variável em uma linha separada
-   - Sem espaços antes ou depois do `=`
-   - Sem aspas ao redor dos valores (a menos que o valor contenha espaços)
-   - Sem comentários na mesma linha das variáveis
+2. **Correct format?**
+   - Each variable on a separate line
+   - No spaces before or after the `=`
+   - No quotes around values (unless the value contains spaces)
+   - No comments on the same line as variables
 
-3. **Valores preenchidos?**
-   - `BINANCE_API_KEY` deve ter sua API key real da Binance
-   - `BINANCE_API_SECRET` deve ter sua API secret real da Binance
-   - `PORT` pode ser 3001 (ou outro número de porta)
+3. **Values filled in?**
+   - `BINANCE_API_KEY` must have your real Binance API key
+   - `BINANCE_API_SECRET` must have your real Binance API secret
+   - `PORT` can be 3001 (or another port number)
 
-## ❌ Erros Comuns
+## ❌ Common Errors
 
-### ❌ ERRADO:
+### ❌ WRONG:
 ```
-BINANCE_API_KEY = sua_key  (espaços ao redor do =)
-BINANCE_API_KEY="sua_key"  (aspas desnecessárias)
-BINANCE_API_KEY=your_api_key_here  (valor de exemplo)
+BINANCE_API_KEY = your_key  (spaces around =)
+BINANCE_API_KEY="your_key"  (unnecessary quotes)
+BINANCE_API_KEY=your_api_key_here  (example value)
 ```
 
-### ✅ CORRETO:
+### ✅ CORRECT:
 ```
-BINANCE_API_KEY=sua_key_real_aqui
-BINANCE_API_SECRET=sua_secret_real_aqui
+BINANCE_API_KEY=your_real_key_here
+BINANCE_API_SECRET=your_real_secret_here
 PORT=3001
 ```
 
-## 🔍 Como Verificar
+## 🔍 How to Verify
 
-1. Abra o arquivo `.env` em um editor de texto
-2. Verifique se tem exatamente estas 3 linhas:
+1. Open the `.env` file in a text editor
+2. Check if it has exactly these 3 lines:
    - `BINANCE_API_KEY=...`
    - `BINANCE_API_SECRET=...`
    - `PORT=3001`
 
-3. Certifique-se de que:
-   - Não há espaços antes ou depois do `=`
-   - Os valores não são os exemplos (`your_api_key_here`)
-   - As credenciais são válidas da sua conta Binance
+3. Make sure:
+   - There are no spaces before or after the `=`
+   - The values are not examples (`your_api_key_here`)
+   - The credentials are valid from your Binance account
 
-## 📝 Onde Obter as Credenciais
+## 📝 Where to Get Credentials
 
-1. Acesse: https://www.binance.com/en/my/settings/api-management
-2. Crie uma nova API Key ou use uma existente
-3. **IMPORTANTE**: Ative a permissão "Enable Reading"
-4. Copie a API Key e API Secret
-5. Cole no arquivo `.env`
+1. Go to: https://www.binance.com/en/my/settings/api-management
+2. Create a new API Key or use an existing one
+3. **IMPORTANT**: Enable the "Enable Reading" permission
+4. Copy the API Key and API Secret
+5. Paste into the `.env` file
 
-## 🚀 Testar
+## 🚀 Test
 
-Depois de configurar, inicie o servidor:
+After configuring, start the server:
 ```bash
 npm start
 ```
 
-Se tudo estiver correto, você verá:
+If everything is correct, you'll see:
 ```
 Server is running on http://localhost:3001
 ```
 
-Se houver erro, verifique a mensagem no console.
-
+If there's an error, check the console message.

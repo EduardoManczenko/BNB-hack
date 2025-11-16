@@ -2,43 +2,43 @@
 
 ## 🚀 Backend (backend-binance) - Railway
 
-**Railway é a melhor opção** porque é simples e funciona perfeitamente para servidores Node.js.
+**Railway is the best option** because it's simple and works perfectly for Node.js servers.
 
-### Passo a passo:
+### Step by step:
 
-1. Acesse [railway.app](https://railway.app) e faça login com GitHub
-2. Clique em "New Project" → "Deploy from GitHub repo"
-3. Selecione o repositório `BNB-hack`
-4. Configure o root directory como `backend-binance`
-5. Vá em "Variables" e adicione:
+1. Go to [railway.app](https://railway.app) and log in with GitHub
+2. Click "New Project" → "Deploy from GitHub repo"
+3. Select the `BNB-hack` repository
+4. Set the root directory to `backend-binance`
+5. Go to "Variables" and add:
    ```
    PORT=3001
-   BINANCE_API_KEY=sua_chave_aqui
-   BINANCE_API_SECRET=seu_secret_aqui
+   BINANCE_API_KEY=your_key_here
+   BINANCE_API_SECRET=your_secret_here
    ```
-6. Railway vai fazer deploy automaticamente
-7. Copie a URL gerada (ex: `https://seu-projeto.railway.app`)
+6. Railway will automatically deploy
+7. Copy the generated URL (e.g., `https://your-project.railway.app`)
 
 ---
 
 ## 🎨 Frontend App (frontend-app) - Vercel
 
-### Passo a passo:
+### Step by step:
 
-1. Acesse [vercel.com](https://vercel.com) e faça login com GitHub
-2. Clique em "Add New Project"
-3. Importe o repositório `BNB-hack`
+1. Go to [vercel.com](https://vercel.com) and log in with GitHub
+2. Click "Add New Project"
+3. Import the `BNB-hack` repository
 4. Configure:
    - **Root Directory**: `frontend-app`
    - **Framework Preset**: Vite
    - **Build Command**: `npm run build`
    - **Output Directory**: `dist`
-5. Vá em "Environment Variables" e adicione:
+5. Go to "Environment Variables" and add:
    ```
-   VITE_API_BASE_URL=https://seu-backend.railway.app
+   VITE_API_BASE_URL=https://your-backend.railway.app
    ```
-   (Use a URL do backend que você copiou no passo anterior)
-6. Clique em "Deploy"
+   (Use the backend URL you copied in the previous step)
+6. Click "Deploy"
 
 ---
 
@@ -48,13 +48,12 @@
 - **Frontend App**: [https://bnb-hack-cjlu.vercel.app](https://bnb-hack-cjlu.vercel.app) ✅
 - **Gateway Front**: [https://bnb-hack-five.vercel.app](https://bnb-hack-five.vercel.app) ✅
 
-**Importante**: Sempre que fizer push no código, Railway e Vercel vão fazer deploy automaticamente!
+**Important**: Whenever you push code, Railway and Vercel will automatically deploy!
 
 ---
 
-## 🔧 Se precisar atualizar a URL do backend:
+## 🔧 If you need to update the backend URL:
 
-1. No Vercel, vá em Project Settings → Environment Variables
-2. Atualize o `VITE_API_BASE_URL` com a nova URL do backend
-3. Faça um novo deploy (ou aguarde o deploy automático)
-
+1. In Vercel, go to Project Settings → Environment Variables
+2. Update `VITE_API_BASE_URL` with the new backend URL
+3. Redeploy (or wait for automatic deployment)
