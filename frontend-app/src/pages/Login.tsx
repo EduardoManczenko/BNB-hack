@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Wallet } from "lucide-react";
+import { Shield } from "lucide-react";
 import { toast } from "sonner";
 
 const Login = () => {
@@ -33,9 +33,11 @@ const Login = () => {
     <div className="min-h-screen bg-gradient-subtle flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-primary mb-4">
-            <Wallet className="w-8 h-8 text-primary-foreground" />
-          </div>
+          <img 
+            src="/nativefi.svg" 
+            alt="NativeFi" 
+            className="h-16 w-auto mx-auto mb-4"
+          />
           <h1 className="text-3xl font-bold text-foreground mb-2">NativeFi</h1>
           <p className="text-muted-foreground">Crypto Payment Gateway</p>
         </div>
