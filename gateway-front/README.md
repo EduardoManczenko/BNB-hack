@@ -1,36 +1,139 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NativeFi Payment Gateway
+
+A modern, responsive cryptocurrency payment gateway interface for customers to send USDT or USDC payments across multiple blockchain networks.
+
+## Features
+
+- 🌐 **Multi-Network Support**: BNB Chain, Arbitrum, and Polygon
+- 💰 **Multi-Token Support**: USDT and USDC
+- 🔗 **Wallet Integration**: MetaMask and Trust Wallet support
+- 🔒 **Secure Transactions**: Direct blockchain transactions via wallet
+- 📱 **Responsive Design**: Works seamlessly on desktop and mobile devices
+- 🎨 **Modern UI**: Styled with Tailwind CSS and shadcn/ui components
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js (v18 or higher)
+- npm, yarn, pnpm, or bun
+- A Web3 wallet (MetaMask, Trust Wallet, etc.)
+
+### Installation
+
+1. Install dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Start the development server:
+```bash
+npm run dev
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The app will be available at `http://localhost:3000`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Build for Production
 
-## Learn More
+```bash
+npm run build
+```
 
-To learn more about Next.js, take a look at the following resources:
+Start the production server:
+```bash
+npm start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Usage
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **Select Network**: Choose from BNB Chain, Arbitrum, or Polygon
+2. **Select Token**: Choose USDT or USDC
+3. **Enter Amount**: Input the payment amount
+4. **Connect Wallet**: Click "Connect Wallet" and approve the connection
+5. **Confirm Transaction**: Review and confirm the transaction in your wallet
 
-## Deploy on Vercel
+## Supported Networks
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### BNB Chain
+- **Chain ID**: `0x38` (56)
+- **RPC**: `https://bsc-dataseed.binance.org/`
+- **Tokens**: USDT, USDC
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Arbitrum
+- **Chain ID**: `0xa4b1` (42161)
+- **RPC**: `https://arb1.arbitrum.io/rpc`
+- **Tokens**: USDT, USDC
+
+### Polygon
+- **Chain ID**: `0x89` (137)
+- **RPC**: `https://polygon-rpc.com`
+- **Tokens**: USDT, USDC
+
+## Project Structure
+
+```
+gateway-front/
+├── app/
+│   ├── page.tsx        # Main payment gateway page
+│   ├── layout.tsx      # Root layout
+│   └── globals.css     # Global styles
+├── components/
+│   └── ui/             # Reusable UI components
+├── public/             # Static assets
+└── package.json
+```
+
+## Technologies
+
+- **Next.js 15** - React framework
+- **React 19** - UI library
+- **TypeScript** - Type safety
+- **Ethers.js** - Ethereum blockchain interaction
+- **Tailwind CSS** - Utility-first CSS
+- **shadcn/ui** - UI component library
+
+## Wallet Integration
+
+The gateway supports:
+- **MetaMask** - Primary wallet provider
+- **Trust Wallet** - Alternative wallet provider
+- **WalletConnect** - Multi-wallet support
+
+### Network Switching
+The gateway automatically prompts users to switch networks when needed, or provides instructions for manual switching.
+
+## Development
+
+```bash
+# Start dev server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+
+# Lint code
+npm run lint
+```
+
+## Configuration
+
+### Fixed Receiver Address
+The receiver address is currently hardcoded in the application. To change it, edit `app/page.tsx`:
+
+```typescript
+const FIXED_RECEIVER = "0xed14922507cee9938faaf2958d577a2aeea9c4e7";
+```
+
+## Security Considerations
+
+- All transactions are processed directly through the user's wallet
+- No private keys are stored or transmitted
+- Users must approve each transaction manually
+- Network validation ensures transactions are sent to the correct chain
+
+## License
+
+ISC

@@ -1,73 +1,126 @@
-# Welcome to your Lovable project
+# NativeFi Admin Dashboard
 
-## Project info
+A modern, responsive admin dashboard for managing cryptocurrency payments, transactions, and earnings with Binance wallet integration.
 
-**URL**: https://lovable.dev/projects/4b24ece4-92d1-4280-9f08-b8c1c901f061
+## Features
 
-## How can I edit this code?
+- 📊 **Dashboard**: Real-time balance tracking and today's received payments
+- 💰 **Transactions**: Complete transaction history with USD conversion (last 90 days)
+- 📈 **Earn**: Vault management with automatic earnings calculation (4.96% APY)
+- 💸 **Withdrawals**: Manage available and unavailable withdrawal amounts
+- 📱 **QR Code**: Generate payment QR codes for customers
+- 🎨 **Modern UI**: Built with shadcn/ui components and Tailwind CSS
 
-There are several ways of editing your application.
+## Getting Started
 
-**Use Lovable**
+### Prerequisites
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/4b24ece4-92d1-4280-9f08-b8c1c901f061) and start prompting.
+- Node.js (v18 or higher)
+- npm or yarn
+- Backend API running on `http://localhost:3001`
 
-Changes made via Lovable will be committed automatically to this repo.
+### Installation
 
-**Use your preferred IDE**
+1. Install dependencies:
+```bash
+npm install
+```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+2. Create a `.env` file (optional):
+```env
+VITE_API_BASE_URL=http://localhost:3001
+```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+3. Start the development server:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The app will be available at `http://localhost:8080`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Build for Production
 
-**Use GitHub Codespaces**
+```bash
+npm run build
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+The built files will be in the `dist` directory.
 
-## What technologies are used for this project?
+## Project Structure
 
-This project is built with:
+```
+frontend-app/
+├── src/
+│   ├── components/      # Reusable UI components
+│   ├── pages/           # Page components
+│   ├── hooks/           # Custom React hooks
+│   ├── assets/          # Static assets
+│   └── App.tsx          # Main application component
+├── public/              # Public assets
+└── package.json
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-## How can I deploy this project?
+## Key Pages
 
-Simply open [Lovable](https://lovable.dev/projects/4b24ece4-92d1-4280-9f08-b8c1c901f061) and click on Share -> Publish.
+### Dashboard
+- Displays total balance (Binance + mock vaults + earnings)
+- Shows today's received payments
+- Quick access cards to other sections
 
-## Can I connect a custom domain to my Lovable project?
+### Transactions
+- Complete transaction history from Binance
+- USD value conversion using historical prices
+- Search and filter functionality
+- Export capability
 
-Yes, you can!
+### Earn
+- Vault management (Child School, Birthday Party)
+- Automatic earnings calculation based on 4.96% APY
+- Visual breakdown with pie chart
+- Monthly earnings distribution chart
+- Total Balance, Vault, and Available for Withdrawal displays
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Withdrawals
+- Available withdrawal amount (Total Balance - Vault)
+- Unavailable withdrawal amount (Vault value)
+- Transaction status management
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+### QR Code
+- Payment QR code display
+- Share and download functionality
 
+## Technologies
+
+- **React 18** - UI library
+- **TypeScript** - Type safety
+- **Vite** - Build tool and dev server
+- **React Router** - Client-side routing
+- **TanStack Query** - Data fetching and caching
+- **shadcn/ui** - UI component library
+- **Tailwind CSS** - Utility-first CSS
+- **Recharts** - Data visualization
+- **Lucide React** - Icons
+
+## Environment Variables
+
+- `VITE_API_BASE_URL` - Backend API base URL (default: `http://localhost:3001`)
+
+## Development
+
+```bash
+# Start dev server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+
+# Lint code
+npm run lint
+```
+
+## License
+
+ISC
