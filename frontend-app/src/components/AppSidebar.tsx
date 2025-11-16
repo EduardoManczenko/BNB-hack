@@ -1,6 +1,7 @@
 import { Wallet, Receipt, Split, Banknote, LayoutDashboard, QrCode } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 import {
   Sidebar,
@@ -24,26 +25,31 @@ const items = [
 ];
 
 export function AppSidebar() {
-  const { open } = useSidebar();
+  const { open, openMobile, isMobile: sidebarIsMobile } = useSidebar();
+  const isMobile = useIsMobile();
   const location = useLocation();
   const currentPath = location.pathname;
 
   const isActive = (path: string) => currentPath === path;
+  
+  // Em mobile usa openMobile, em desktop usa open
+  const isMenuOpen = isMobile ? openMobile : open;
 
   return (
     <Sidebar collapsible="icon">
       <SidebarContent>
-        <div className="p-4 border-b border-border">
+        <div className="h-14 border-b border-border flex items-center px-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-primary flex items-center justify-center shrink-0">
-              <Wallet className="w-6 h-6 text-primary-foreground" />
-            </div>
-            {open && (
-              <div>
-                <h1 className="text-lg font-bold text-foreground">NativeFi</h1>
-                <p className="text-xs text-muted-foreground">Payment Gateway</p>
-              </div>
+            {/* Logo quando menu aberto (tanto mobile quanto desktop) */}
+            {isMenuOpen && (
+              <img 
+                src="/nativefi.svg" 
+                alt="NativeFi" 
+                className="h-8 w-auto"
+              />
             )}
+            {/* Botão quando menu fechado (apenas desktop, em mobile fica no header) */}
+            {!isMobile && !open && <SidebarTrigger />}
           </div>
         </div>
 
