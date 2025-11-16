@@ -155,7 +155,7 @@ const Transactions = () => {
                         {getStatusBadge(tx.status)}
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {tx.network} • {tx.date}
+                        {tx.date}
                       </p>
                     </div>
                   </div>
@@ -165,14 +165,9 @@ const Transactions = () => {
                     }`}>
                       {tx.amountInUSD !== null 
                         ? `${tx.type === "incoming" ? "+" : "-"}$${tx.amountInUSD.toFixed(2)}`
-                        : `${tx.type === "incoming" ? "+" : "-"}${tx.amount.toFixed(2)} ${tx.currency}`
+                        : `${tx.type === "incoming" ? "+" : "-"}$0.00`
                       }
                     </p>
-                    {tx.amountInUSD !== null && (
-                      <p className="text-xs md:text-sm text-muted-foreground">
-                        {tx.amount.toFixed(4)} {tx.currency}
-                      </p>
-                    )}
                   </div>
                 </div>
               ))}

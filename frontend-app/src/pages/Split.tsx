@@ -4,120 +4,223 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { Settings, PieChart as PieChartIcon, Plus, Trash2, TrendingUp } from "lucide-react";
+import { Settings, PieChart as PieChartIcon, Plus, TrendingUp, Loader2 } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
+import { useQuery } from "@tanstack/react-query";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
+
+// Função para buscar saldo da Binance
+const fetchBalance = async () => {
+  const response = await fetch(`${API_BASE_URL}/api/balance`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch balance");
+  }
+  return response.json();
+};
 
 interface SplitRecipient {
   id: string;
   name: string;
-  percentage: number;
-  address: string;
+  currentBalance: number;
+  startDate: string;
+  endDate: string;
 }
+
+const getTodayDate = () => {
+  const today = new Date();
+  return today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+};
+
+const getDateDaysAgo = (days: number) => {
+  const date = new Date();
+  date.setDate(date.getDate() - days);
+  return date.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+};
+
+const getSpecificDate = (year: number, month: number, day: number) => {
+  const date = new Date(year, month - 1, day); // month is 0-indexed
+  return date.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+};
+
+const getDateDaysFromNow = (days: number) => {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  return date.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+};
+
+const getEndDate = (startDate: string) => {
+  const start = new Date(startDate);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 30); // Add 30 days
+  return end.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+};
+
+const getDaysRemaining = (endDate: string) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const end = new Date(endDate);
+  end.setHours(0, 0, 0, 0);
+  const diffTime = end.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays;
+};
 
 const mockSplitRecipients: SplitRecipient[] = [
   {
     id: "1",
-    name: "Platform Fee",
-    percentage: 15,
-    address: "0x1a2b...3c4d"
+    name: "Child School",
+    currentBalance: 50,
+    startDate: getTodayDate(),
+    endDate: getEndDate(getTodayDate())
   },
   {
     id: "2",
-    name: "Partner Commission",
-    percentage: 25,
-    address: "0x5e6f...7g8h"
-  },
-  {
-    id: "3",
-    name: "Merchant Revenue",
-    percentage: 60,
-    address: "0x9i0j...1k2l"
+    name: "Birthday Party",
+    currentBalance: 100,
+    startDate: getDateDaysAgo(20), // Started 20 days ago
+    endDate: getDateDaysFromNow(10) // Ends in 10 days
   }
 ];
 
 // Monthly yield distribution history (mock data)
-const monthlyYieldHistory = [
+// This will be updated inside the component to use real earnings for November
+// Values are in percentage of total investment ($150)
+const getMonthlyYieldHistory = (realEarnings: number, totalInvestment: number) => [
   {
     month: "Jul",
-    "Platform Fee": 180,
-    "Partner Commission": 300,
-    "Merchant Revenue": 720
+    Earning: 0.3 // 0.3%
   },
   {
     month: "Aug",
-    "Platform Fee": 220,
-    "Partner Commission": 380,
-    "Merchant Revenue": 890
+    Earning: 0.1 // 0.1%
   },
   {
     month: "Sep",
-    "Platform Fee": 195,
-    "Partner Commission": 320,
-    "Merchant Revenue": 780
+    Earning: 0.4 // 0.4%
   },
   {
     month: "Oct",
-    "Platform Fee": 250,
-    "Partner Commission": 420,
-    "Merchant Revenue": 1000
+    Earning: 0.15 // 0.15%
   },
   {
     month: "Nov",
-    "Platform Fee": 280,
-    "Partner Commission": 470,
-    "Merchant Revenue": 1120
-  },
-  {
-    month: "Dec",
-    "Platform Fee": 310,
-    "Partner Commission": 520,
-    "Merchant Revenue": 1250
+    Earning: (realEarnings / totalInvestment) * 100 // Real earnings percentage
   }
 ];
 
 const Split = () => {
   const [splitRecipients, setSplitRecipients] = useState<SplitRecipient[]>(mockSplitRecipients);
   const [isEditingRecipient, setIsEditingRecipient] = useState(false);
-  const [editingRecipient, setEditingRecipient] = useState<SplitRecipient | null>(null);
-  const [newRecipient, setNewRecipient] = useState({ name: "", percentage: 0, address: "" });
+  const [newRecipient, setNewRecipient] = useState({ name: "", currentBalance: 0, startDate: getTodayDate(), endDate: getEndDate(getTodayDate()) });
+
+  // Buscar saldo da Binance
+  const { data: balanceData, isLoading: isLoadingBalance } = useQuery({
+    queryKey: ["balance"],
+    queryFn: fetchBalance,
+    refetchInterval: 30000, // Atualizar a cada 30 segundos
+  });
 
   // Yield fixo de 4.96% ao ano
   const fixedYieldAPY = 4.96;
 
+  // Calculate earned yield since start date
+  const calculateEarnedYield = (startDate: string, initialBalance: number) => {
+    const start = new Date(startDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    start.setHours(0, 0, 0, 0);
+    
+    const diffTime = today.getTime() - start.getTime();
+    const daysElapsed = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (daysElapsed <= 0) return 0;
+    
+    // Calculate daily rate from APY (compounded)
+    // APY = (1 + daily_rate)^365 - 1
+    // daily_rate = (1 + APY)^(1/365) - 1
+    const dailyRate = Math.pow(1 + (fixedYieldAPY / 100), 1 / 365) - 1;
+    
+    // Calculate total earned: initial * ((1 + daily_rate)^days - 1)
+    const totalEarned = initialBalance * (Math.pow(1 + dailyRate, daysElapsed) - 1);
+    
+    return totalEarned;
+  };
+
+  // Calculate total earnings from all recipients
+  const totalEarnings = splitRecipients.reduce((sum, r) => {
+    return sum + calculateEarnedYield(r.startDate, r.currentBalance);
+  }, 0);
+
+  // Get monthly yield history with real earnings for November
+  const totalInvestment = 150; // $50 Child School + $100 Birthday Party
+  const monthlyYieldHistory = getMonthlyYieldHistory(totalEarnings, totalInvestment);
+
+  // Total Balance = Real Binance Balance + $150 (Child School $50 + Birthday Party $100) + Total Earnings
+  const MOCK_BALANCE_ADDITION = 150; // $50 Child School + $100 Birthday Party
+  const availableBalance = balanceData?.success 
+    ? parseFloat(balanceData.totalBalance) + MOCK_BALANCE_ADDITION + totalEarnings
+    : MOCK_BALANCE_ADDITION + totalEarnings;
+
+  // Calculate vault value (sum of total balances from Child School and Birthday Party)
+  const vaultValue = splitRecipients.reduce((sum, r) => {
+    const totalWithEarnings = r.currentBalance + calculateEarnedYield(r.startDate, r.currentBalance);
+    return sum + totalWithEarnings;
+  }, 0);
+
+  // Calculate available for withdrawal (Total Balance - Vault)
+  const availableForWithdrawal = availableBalance - vaultValue;
+
   const handleAddRecipient = () => {
-    if (!newRecipient.name || !newRecipient.address || newRecipient.percentage <= 0) return;
+    if (!newRecipient.name || newRecipient.currentBalance <= 0) return;
     
     const recipient: SplitRecipient = {
       id: Date.now().toString(),
-      ...newRecipient
+      ...newRecipient,
+      endDate: getEndDate(newRecipient.startDate)
     };
     
     setSplitRecipients([...splitRecipients, recipient]);
-    setNewRecipient({ name: "", percentage: 0, address: "" });
+    setNewRecipient({ name: "", currentBalance: 0, startDate: getTodayDate(), endDate: getEndDate(getTodayDate()) });
     setIsEditingRecipient(false);
   };
 
-  const handleRemoveRecipient = (id: string) => {
-    setSplitRecipients(splitRecipients.filter(r => r.id !== id));
+
+  const totalSplitBalance = splitRecipients.reduce((sum, r) => sum + r.currentBalance, 0);
+
+  // Map recipients to specific colors
+  const getRecipientColor = (recipientName: string) => {
+    if (recipientName === "Child School") {
+      return "#9333ea"; // Purple color
+    } else if (recipientName === "Birthday Party") {
+      return "#3b82f6"; // Blue color
+    } else if (recipientName === "Earnings") {
+      return "#22c55e"; // Green color for earnings
+    }
+    return "hsl(var(--accent))"; // Default color
   };
 
-  const handleUpdateRecipient = () => {
-    if (!editingRecipient) return;
-    
-    setSplitRecipients(splitRecipients.map(r => 
-      r.id === editingRecipient.id ? editingRecipient : r
-    ));
-    setEditingRecipient(null);
-  };
+  const pieData = [
+    ...splitRecipients.map((recipient) => ({
+      name: recipient.name,
+      value: recipient.currentBalance,
+      color: getRecipientColor(recipient.name)
+    })),
+    // Always show Earnings slice, with minimum value to ensure visibility
+    {
+      name: "Earnings",
+      value: totalEarnings > 0 ? Math.max(totalEarnings, totalSplitBalance * 0.03) : totalSplitBalance * 0.02, // At least 3% of total or 2% if no earnings
+      color: getRecipientColor("Earnings")
+    }
+  ];
 
-  const totalPercentage = splitRecipients.reduce((sum, r) => sum + r.percentage, 0);
-
-  const pieData = splitRecipients.map((recipient) => ({
-    name: recipient.name,
-    value: recipient.percentage,
-  }));
-
-  const COLORS = ['hsl(var(--primary))', 'hsl(var(--success))', 'hsl(var(--accent))'];
+  const COLORS = pieData.map(item => item.color);
+  
+  // Calculate total for percentage calculation (visual total for pie chart)
+  const totalValue = pieData.reduce((sum, item) => sum + item.value, 0);
+  
+  // Calculate real total (initial balances + real earnings) for real percentage calculation
+  const realTotal = totalSplitBalance + totalEarnings;
 
   return (
     <div className="p-4 md:p-6 space-y-4 md:space-y-6">
@@ -135,80 +238,116 @@ const Split = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Settings className="w-5 h-5" />
-              Recipients
+              Vaults
             </CardTitle>
-            <CardDescription>Manage split recipients and percentages</CardDescription>
+            <div className="mt-4 grid grid-cols-3 gap-3">
+              <div className="p-3 rounded-lg bg-muted/30 border border-border">
+                <p className="text-xs text-muted-foreground mb-1">Total Balance</p>
+                <p className="text-xl font-bold text-foreground">
+                  {isLoadingBalance ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Loading...</span>
+                    </div>
+                  ) : (
+                    `$${availableBalance.toFixed(2)}`
+                  )}
+                </p>
+              </div>
+              <div className="p-3 rounded-lg bg-muted/30 border border-border">
+                <p className="text-xs text-muted-foreground mb-1">Vault</p>
+                <p className="text-xl font-bold text-foreground">
+                  ${vaultValue.toFixed(2)}
+                </p>
+              </div>
+              <div className="p-3 rounded-lg bg-muted/30 border border-border">
+                <p className="text-xs text-muted-foreground mb-1">Available for Withdrawal</p>
+                <p className="text-xl font-bold text-foreground">
+                  {isLoadingBalance ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Loading...</span>
+                    </div>
+                  ) : (
+                    `$${availableForWithdrawal.toFixed(2)}`
+                  )}
+                </p>
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             {splitRecipients.map((recipient) => (
               <div key={recipient.id} className="p-4 rounded-lg bg-muted/30 border border-border">
-                {editingRecipient?.id === recipient.id ? (
-                  <div className="space-y-3">
-                    <div className="grid gap-3">
+                <div>
+                  <div className="mb-2 flex items-center gap-2">
+                    {(recipient.name === "Child School" || recipient.name === "Birthday Party") && (
+                      <div 
+                        className="w-4 h-4 rounded border border-border"
+                        style={{ backgroundColor: getRecipientColor(recipient.name) }}
+                      />
+                    )}
+                    <p className="font-semibold text-foreground">{recipient.name}</p>
+                  </div>
+                  <div className="space-y-2">
+                    {(recipient.name === "Child School" || recipient.name === "Birthday Party") ? (
+                      <>
+                        <div className="flex items-baseline gap-3">
+                          <div>
+                            <p className="text-xs text-muted-foreground mb-0.5">Initial</p>
+                            <p className="text-base font-semibold text-foreground">
+                              ${recipient.currentBalance.toFixed(2)}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground mb-0.5">Earn</p>
+                            <p className="text-base font-semibold text-success">
+                              +${calculateEarnedYield(recipient.startDate, recipient.currentBalance).toFixed(2)}
+                            </p>
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-xs text-muted-foreground mb-0.5">Total</p>
+                            <p className="text-base font-bold text-success">
+                              ${(recipient.currentBalance + calculateEarnedYield(recipient.startDate, recipient.currentBalance)).toFixed(2)}
+                            </p>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
                       <div>
-                        <Label>Investment Name</Label>
-                        <Input
-                          value={editingRecipient.name}
-                          onChange={(e) => setEditingRecipient({...editingRecipient, name: e.target.value})}
-                          placeholder="e.g., Platform Fee, Partner Commission"
-                        />
-                      </div>
-                      <div>
-                        <Label>Percentage</Label>
-                        <Input
-                          type="number"
-                          value={editingRecipient.percentage}
-                          onChange={(e) => setEditingRecipient({...editingRecipient, percentage: Number(e.target.value)})}
-                          placeholder="25"
-                        />
-                      </div>
-                      <div>
-                        <Label>Wallet Address</Label>
-                        <Input
-                          value={editingRecipient.address}
-                          onChange={(e) => setEditingRecipient({...editingRecipient, address: e.target.value})}
-                          placeholder="0x..."
-                        />
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" onClick={handleUpdateRecipient}>Save</Button>
-                      <Button size="sm" variant="outline" onClick={() => setEditingRecipient(null)}>Cancel</Button>
+                            <p className="text-xs text-muted-foreground mb-0.5">Balance</p>
+                            <p className="text-base font-semibold text-foreground">
+                              ${recipient.currentBalance.toFixed(2)}
+                            </p>
+                          </div>
+                    )}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className={`text-xs font-semibold ${
+                        getDaysRemaining(recipient.endDate) > 0 
+                          ? "text-warning" 
+                          : "text-destructive"
+                      }`}>
+                        {getDaysRemaining(recipient.endDate) > 0 
+                          ? `${getDaysRemaining(recipient.endDate)} days remaining`
+                          : "Stake expired"
+                        }
+                      </p>
+                      <span className="text-xs text-muted-foreground">•</span>
+                      <p className="text-xs text-muted-foreground">
+                        Start: {new Date(recipient.startDate).toLocaleDateString()}
+                      </p>
+                      <span className="text-xs text-muted-foreground">•</span>
+                      <p className="text-xs text-muted-foreground">
+                        End: {new Date(recipient.endDate).toLocaleDateString()}
+                      </p>
                     </div>
                   </div>
-                ) : (
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="font-semibold text-foreground">{recipient.name}</p>
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-primary text-primary-foreground">
-                          {recipient.percentage}%
-                        </Badge>
-                        <Button 
-                          size="sm" 
-                          variant="ghost"
-                          onClick={() => setEditingRecipient(recipient)}
-                        >
-                          <Settings className="w-4 h-4" />
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="ghost"
-                          onClick={() => handleRemoveRecipient(recipient.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                    <code className="text-xs text-muted-foreground">{recipient.address}</code>
-                  </div>
-                )}
+                </div>
               </div>
             ))}
 
             {isEditingRecipient ? (
               <div className="space-y-3 pt-4 border-t border-border">
-                <h3 className="font-semibold">Add New Investment</h3>
+                <h3 className="font-semibold">Add New Vault</h3>
                 <div className="grid gap-3">
                   <div>
                     <Label>Investment Name</Label>
@@ -219,20 +358,37 @@ const Split = () => {
                     />
                   </div>
                   <div>
-                    <Label>Percentage</Label>
+                    <Label>Current Balance</Label>
                     <Input
                       type="number"
-                      value={newRecipient.percentage || ""}
-                      onChange={(e) => setNewRecipient({...newRecipient, percentage: Number(e.target.value)})}
-                      placeholder="25"
+                      step="0.01"
+                      value={newRecipient.currentBalance || ""}
+                      onChange={(e) => setNewRecipient({...newRecipient, currentBalance: Number(e.target.value)})}
+                      placeholder="10.00"
                     />
                   </div>
                   <div>
-                    <Label>Wallet Address</Label>
+                    <Label>Start Date</Label>
                     <Input
-                      value={newRecipient.address}
-                      onChange={(e) => setNewRecipient({...newRecipient, address: e.target.value})}
-                      placeholder="0x..."
+                      type="date"
+                      value={newRecipient.startDate}
+                      onChange={(e) => {
+                        const newStartDate = e.target.value;
+                        setNewRecipient({
+                          ...newRecipient, 
+                          startDate: newStartDate,
+                          endDate: getEndDate(newStartDate)
+                        });
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label>End Date</Label>
+                    <Input
+                      type="date"
+                      value={newRecipient.endDate}
+                      disabled
+                      className="bg-muted"
                     />
                   </div>
                 </div>
@@ -240,14 +396,14 @@ const Split = () => {
                   <Button onClick={handleAddRecipient}>Add Investment</Button>
                   <Button variant="outline" onClick={() => {
                     setIsEditingRecipient(false);
-                    setNewRecipient({ name: "", percentage: 0, address: "" });
+                    setNewRecipient({ name: "", currentBalance: 0, startDate: getTodayDate(), endDate: getEndDate(getTodayDate()) });
                   }}>Cancel</Button>
                 </div>
               </div>
             ) : (
-              <Button onClick={() => setIsEditingRecipient(true)} variant="outline" className="w-full">
+              <Button onClick={() => {}} variant="outline" className="w-full">
                 <Plus className="w-4 h-4 mr-2" />
-                Add New Investment
+                Add New Vault
               </Button>
             )}
           </CardContent>
@@ -257,9 +413,8 @@ const Split = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <PieChartIcon className="w-5 h-5" />
-              Split Distribution
+              Vault Distribution
             </CardTitle>
-            <CardDescription>Visual breakdown of earn distribution</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -269,8 +424,36 @@ const Split = () => {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, value }) => `${name}: ${value}%`}
+                  label={({ value, name, cx, cy, midAngle, innerRadius, outerRadius }) => {
+                    // Use actual earnings value for display, not the inflated visualization value
+                    const displayValue = name === "Earnings" ? totalEarnings : value;
+                    // Calculate real percentage based on real total, not visual total
+                    const realPercentage = name === "Earnings" 
+                      ? (realTotal > 0 ? ((totalEarnings / realTotal) * 100).toFixed(2) : '0.00')
+                      : (realTotal > 0 ? ((value / realTotal) * 100).toFixed(2) : '0.00');
+                    const RADIAN = Math.PI / 180;
+                    // Position label outside the pie slice
+                    const radius = outerRadius + 15;
+                    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                    
+                    return (
+                      <text 
+                        x={x} 
+                        y={y} 
+                        fill="hsl(var(--foreground))" 
+                        textAnchor={x > cx ? 'start' : 'end'} 
+                        dominantBaseline="central"
+                        fontSize={11}
+                        fontWeight="600"
+                      >
+                        {`$${displayValue.toFixed(2)} (${realPercentage}%)`}
+                      </text>
+                    );
+                  }}
                   outerRadius={80}
+                  innerRadius={0}
+                  minAngle={1}
                   fill="hsl(var(--primary))"
                   dataKey="value"
                 >
@@ -279,7 +462,9 @@ const Split = () => {
                   ))}
                 </Pie>
                 <Tooltip />
-                <Legend />
+                <Legend 
+                  formatter={(value) => <span style={{ color: 'hsl(var(--foreground))' }}>{value}</span>}
+                />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -291,9 +476,8 @@ const Split = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="w-5 h-5" />
-            Monthly Yield Distribution
+              Monthly Earn Distribution
           </CardTitle>
-          <CardDescription>Evolution of earnings by investment category</CardDescription>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={350}>
@@ -307,7 +491,8 @@ const Split = () => {
               <YAxis 
                 className="text-xs"
                 stroke="hsl(var(--muted-foreground))"
-                label={{ value: 'USD ($)', angle: -90, position: 'insideLeft', style: { fill: 'hsl(var(--muted-foreground))' } }}
+                label={{ value: '%', angle: -90, position: 'insideLeft', style: { fill: 'hsl(var(--muted-foreground))' } }}
+                tickFormatter={(value) => `${value.toFixed(2)}%`}
               />
               <Tooltip 
                 contentStyle={{
@@ -320,55 +505,13 @@ const Split = () => {
               <Legend />
               <Line 
                 type="monotone" 
-                dataKey="Platform Fee" 
-                stroke="hsl(var(--primary))" 
-                strokeWidth={2}
-                dot={{ fill: 'hsl(var(--primary))' }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="Partner Commission" 
+                dataKey="Earning" 
                 stroke="hsl(var(--success))" 
                 strokeWidth={2}
                 dot={{ fill: 'hsl(var(--success))' }}
               />
-              <Line 
-                type="monotone" 
-                dataKey="Merchant Revenue" 
-                stroke="hsl(var(--accent))" 
-                strokeWidth={2}
-                dot={{ fill: 'hsl(var(--accent))' }}
-              />
             </LineChart>
           </ResponsiveContainer>
-
-          {/* Summary Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 pt-6 border-t border-border">
-            <div className="space-y-1">
-              <p className="text-xs text-muted-foreground">Platform Fee (Dec)</p>
-              <p className="text-xl font-bold text-primary">$310.00</p>
-              <p className="text-xs text-success flex items-center gap-1">
-                <TrendingUp className="w-3 h-3" />
-                +10.7% vs Nov
-              </p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-xs text-muted-foreground">Partner Commission (Dec)</p>
-              <p className="text-xl font-bold text-success">$520.00</p>
-              <p className="text-xs text-success flex items-center gap-1">
-                <TrendingUp className="w-3 h-3" />
-                +10.6% vs Nov
-              </p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-xs text-muted-foreground">Merchant Revenue (Dec)</p>
-              <p className="text-xl font-bold text-accent">$1,250.00</p>
-              <p className="text-xs text-success flex items-center gap-1">
-                <TrendingUp className="w-3 h-3" />
-                +11.6% vs Nov
-              </p>
-            </div>
-          </div>
         </CardContent>
       </Card>
 
