@@ -9,8 +9,8 @@ import { toast } from "sonner";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("admin@admin.com");
+  const [password, setPassword] = useState("admin");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -54,7 +54,7 @@ const Login = () => {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="your@email.com"
+                  placeholder="admin@admin.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="bg-background"
@@ -67,13 +67,17 @@ const Login = () => {
                 <Input
                   id="password"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="admin"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="bg-background"
                   required
                 />
               </div>
+              
+              <p className="text-xs text-muted-foreground text-center">
+                Note: You can use any email and password to log in
+              </p>
 
               <Button 
                 type="submit" 
