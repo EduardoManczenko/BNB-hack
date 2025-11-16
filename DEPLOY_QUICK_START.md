@@ -42,12 +42,11 @@
 
 ---
 
-## ✅ Pronto!
+## ✅ Production URLs
 
-Agora você tem:
-- **Backend**: Rodando no Railway
-- **Frontend App**: Rodando no Vercel
-- **Gateway Front**: Já está publicado no Vercel em [https://bnb-hack-five.vercel.app](https://bnb-hack-five.vercel.app)
+- **Backend**: Deployed on Railway ✅
+- **Frontend App**: [https://bnb-hack-cjlu.vercel.app](https://bnb-hack-cjlu.vercel.app) ✅
+- **Gateway Front**: [https://bnb-hack-five.vercel.app](https://bnb-hack-five.vercel.app) ✅
 
 **Importante**: Sempre que fizer push no código, Railway e Vercel vão fazer deploy automaticamente!
 

@@ -71,12 +71,17 @@ cd gateway-front
 npm run dev
 ```
 
-## Port Configuration
+## Live Applications
+
+- **Admin Dashboard (Frontend App)**: [https://bnb-hack-cjlu.vercel.app](https://bnb-hack-cjlu.vercel.app)
+- **Payment Gateway (Gateway Front)**: [https://bnb-hack-five.vercel.app](https://bnb-hack-five.vercel.app)
+- **Backend API**: Deployed on Railway (configure your backend URL)
+
+## Local Development Ports
 
 - **Backend API**: `http://localhost:3001`
 - **Frontend App**: `http://localhost:8080`
-- **Gateway Front**: `http://localhost:3000` (development)
-- **Gateway Front (Production)**: `https://bnb-hack-five.vercel.app`
+- **Gateway Front**: `http://localhost:3000`
 
 ## Features
 
@@ -87,6 +92,7 @@ npm run dev
 - Withdrawal management
 - QR code generation for payments
 - Responsive design with modern UI
+- **Live**: [https://bnb-hack-cjlu.vercel.app](https://bnb-hack-cjlu.vercel.app)
 
 ### Payment Gateway (`gateway-front`)
 - Multi-network support (BNB Chain, Arbitrum, Polygon)

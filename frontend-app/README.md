@@ -2,6 +2,8 @@
 
 A modern, responsive admin dashboard for managing cryptocurrency payments, transactions, and earnings with Binance wallet integration.
 
+**🌐 Live Application**: [https://bnb-hack-cjlu.vercel.app](https://bnb-hack-cjlu.vercel.app)
+
 ## Features
 
 - 📊 **Dashboard**: Real-time balance tracking and today's received payments

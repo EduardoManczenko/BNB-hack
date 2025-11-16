@@ -4,9 +4,9 @@ This guide explains how to deploy the NativeFi Payment Gateway projects.
 
 ## Overview
 
-- **backend-binance**: Node.js/Express API server (needs continuous running)
-- **frontend-app**: Vite/React application (can deploy to Vercel)
-- **gateway-front**: Next.js application (already deployed on Vercel at [https://bnb-hack-five.vercel.app](https://bnb-hack-five.vercel.app))
+- **backend-binance**: Node.js/Express API server (deployed on Railway)
+- **frontend-app**: Vite/React application (deployed on Vercel at [https://bnb-hack-cjlu.vercel.app](https://bnb-hack-cjlu.vercel.app))
+- **gateway-front**: Next.js application (deployed on Vercel at [https://bnb-hack-five.vercel.app](https://bnb-hack-five.vercel.app))
 
 ---
 
@@ -196,11 +196,11 @@ VITE_API_BASE_URL=https://your-backend-url.railway.app
 
 ---
 
-## Recommended Setup
+## Production URLs
 
-1. **Backend**: Deploy to Railway (easiest and most reliable)
-2. **Frontend App**: Deploy to Vercel (perfect for static sites)
-3. **Gateway Front**: Already deployed on Vercel at [https://bnb-hack-five.vercel.app](https://bnb-hack-five.vercel.app) ✅
+1. **Backend**: Deployed on Railway ✅
+2. **Frontend App**: [https://bnb-hack-cjlu.vercel.app](https://bnb-hack-cjlu.vercel.app) ✅
+3. **Gateway Front**: [https://bnb-hack-five.vercel.app](https://bnb-hack-five.vercel.app) ✅
 
 This gives you:
 - Continuous deployment from GitHub
