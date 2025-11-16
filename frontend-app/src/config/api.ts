@@ -15,7 +15,11 @@ const getApiBaseUrl = (): string => {
   }
   
   // Fallback to localhost only in development
-  const finalUrl = apiUrl || 'http://localhost:3001';
+  let finalUrl = apiUrl || 'http://localhost:3001';
+  
+  // Remove trailing slash to avoid double slashes in URLs
+  finalUrl = finalUrl.replace(/\/+$/, '');
+  
   console.log('[API Config] Final API Base URL:', finalUrl);
   
   return finalUrl;
