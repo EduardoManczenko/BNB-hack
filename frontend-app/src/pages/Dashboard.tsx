@@ -1,13 +1,32 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, LogOut, ArrowRight } from "lucide-react";
+import { TrendingUp, LogOut, ArrowRight, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import merchantQR from "@/assets/merchant-qr.png";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
+
+// Função para buscar saldo da Binance
+const fetchBalance = async () => {
+  const response = await fetch(`${API_BASE_URL}/api/balance`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch balance");
+  }
+  return response.json();
+};
 
 const Dashboard = () => {
   const navigate = useNavigate();
 
-  const totalBalance = 1245.50;
+  // Buscar saldo da Binance
+  const { data: balanceData, isLoading, error } = useQuery({
+    queryKey: ["balance"],
+    queryFn: fetchBalance,
+    refetchInterval: 30000, // Atualizar a cada 30 segundos
+  });
+
+  const totalBalance = balanceData?.success ? parseFloat(balanceData.totalBalance) : 0;
   const totalToday = 225.50;
 
   const handleLogout = () => {
@@ -33,14 +52,25 @@ const Dashboard = () => {
           <CardHeader className="pb-3">
             <CardDescription className="text-xs">Total Balance</CardDescription>
             <CardTitle className="text-2xl md:text-3xl font-bold">
-              ${totalBalance.toFixed(2)}
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Loading...</span>
+                </div>
+              ) : error ? (
+                <span className="text-destructive">Error loading balance</span>
+              ) : (
+                `$${totalBalance.toFixed(2)}`
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2 text-xs md:text-sm text-success">
-              <TrendingUp className="w-4 h-4" />
-              <span>+12.5% this month</span>
-            </div>
+            {!isLoading && !error && (
+              <div className="flex items-center gap-2 text-xs md:text-sm text-success">
+                <TrendingUp className="w-4 h-4" />
+                <span>Binance Wallet</span>
+              </div>
+            )}
           </CardContent>
         </Card>
 

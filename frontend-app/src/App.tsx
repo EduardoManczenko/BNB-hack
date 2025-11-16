@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { Wallet } from "lucide-react";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import QRCode from "./pages/QRCode";
@@ -21,8 +22,17 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
       <div className="min-h-screen flex w-full bg-gradient-subtle">
         <AppSidebar />
         <main className="flex-1">
-          <header className="h-14 border-b border-border bg-card/50 backdrop-blur-sm flex items-center px-4">
+          <header className="h-14 border-b border-border bg-card/50 backdrop-blur-sm flex items-center px-4 gap-3">
             <SidebarTrigger />
+            <div className="md:hidden flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center shrink-0">
+                <Wallet className="w-5 h-5 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="text-sm font-bold text-foreground">NativeFi</h1>
+                <p className="text-xs text-muted-foreground">Payment Gateway</p>
+              </div>
+            </div>
           </header>
           {children}
         </main>

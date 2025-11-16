@@ -1,0 +1,27 @@
+{
+  "name": "backend-binance",
+  "version": "1.0.0",
+  "description": "Backend for Binance wallet balance integration",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "check-env": "node check-env.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "axios": "^1.6.2"
+  },
+  "keywords": [
+    "binance",
+    "api",
+    "wallet",
+    "balance"
+  ],
+  "author": "",
+  "license": "ISC"
+}
+
