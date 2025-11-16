@@ -24,6 +24,19 @@ const fetchTodayDeposits = async () => {
   return response.json();
 };
 
+// Função para buscar histórico de Earn
+const fetchEarnHistory = async () => {
+  const response = await fetch(`${API_BASE_URL}/api/earn/history`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch earn history");
+  }
+  const data = await response.json();
+  if (data.success) {
+    return data;
+  }
+  throw new Error(data.error || "Failed to fetch earn history");
+};
+
 const Dashboard = () => {
   const navigate = useNavigate();
 
@@ -45,9 +58,27 @@ const Dashboard = () => {
     refetchInterval: 30000, // Atualizar a cada 30 segundos
   });
 
+  // Buscar histórico de Earn
+  const { 
+    data: earnHistoryData, 
+    isLoading: isLoadingEarnHistory,
+    error: earnHistoryError
+  } = useQuery({
+    queryKey: ["earn-history"],
+    queryFn: fetchEarnHistory,
+    refetchInterval: 30000, // Atualizar a cada 30 segundos
+  });
+
   const totalBalance = balanceData?.success ? parseFloat(balanceData.totalBalance) : 0;
   const totalToday = depositsData?.success ? parseFloat(depositsData.totalToday) : 0;
   const transactionCount = depositsData?.success ? depositsData.count : 0;
+  
+  // Calcular total de rendimentos do Earn (soma de todos os juros ganhos)
+  const totalEarnYield = earnHistoryData?.success && earnHistoryData.interests
+    ? earnHistoryData.interests.reduce((sum: number, interest: { amountInUSD: number | null }) => {
+        return sum + (interest.amountInUSD || 0);
+      }, 0)
+    : 0;
 
   return (
     <div className="p-4 md:p-6 space-y-4 md:space-y-6">
@@ -104,6 +135,37 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
+        <Card className="shadow-card border-border">
+          <CardHeader className="pb-3">
+            <CardDescription className="text-xs">Earn Yield (Last 90 Days)</CardDescription>
+            <CardTitle className="text-2xl md:text-3xl font-bold">
+              {isLoadingEarnHistory ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Loading...</span>
+                </div>
+              ) : earnHistoryError ? (
+                <span className="text-destructive">Error</span>
+              ) : (
+                `$${totalEarnYield.toFixed(2)}`
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoadingEarnHistory ? (
+              <div className="text-xs md:text-sm text-muted-foreground">Loading...</div>
+            ) : earnHistoryError ? (
+              <div className="text-xs md:text-sm text-muted-foreground">Error loading earn data</div>
+            ) : earnHistoryData?.success ? (
+              <div className="text-xs md:text-sm text-muted-foreground">
+                {earnHistoryData.interests?.length || 0} {earnHistoryData.interests?.length === 1 ? 'interest payment' : 'interest payments'}
+              </div>
+            ) : (
+              <div className="text-xs md:text-sm text-muted-foreground">No earn data</div>
+            )}
+          </CardContent>
+        </Card>
+
         <Card className="shadow-card border-border sm:col-span-2 lg:col-span-1">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg">Payment QR Code</CardTitle>
@@ -134,7 +196,7 @@ const Dashboard = () => {
         <Card className="shadow-card border-border hover:shadow-elevated transition-shadow cursor-pointer" onClick={() => navigate("/split")}>
           <CardHeader>
             <CardTitle className="flex items-center justify-between text-base md:text-lg">
-              Payment Split
+              Earn
               <ArrowRight className="w-4 h-4 md:w-5 md:h-5 text-muted-foreground" />
             </CardTitle>
             <CardDescription className="text-xs">Configure payment distribution</CardDescription>

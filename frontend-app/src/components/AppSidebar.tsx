@@ -20,7 +20,7 @@ const items = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "QR Code", url: "/qrcode", icon: QrCode },
   { title: "Transactions", url: "/transactions", icon: Receipt },
-  { title: "Payment Split", url: "/split", icon: Split },
+  { title: "Earn", url: "/split", icon: Split },
   { title: "Withdrawals", url: "/withdrawals", icon: Banknote },
 ];
 

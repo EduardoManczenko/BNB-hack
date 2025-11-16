@@ -81,6 +81,9 @@ const Split = () => {
   const [editingRecipient, setEditingRecipient] = useState<SplitRecipient | null>(null);
   const [newRecipient, setNewRecipient] = useState({ name: "", percentage: 0, address: "" });
 
+  // Yield fixo de 4.96% ao ano
+  const fixedYieldAPY = 4.96;
+
   const handleAddRecipient = () => {
     if (!newRecipient.name || !newRecipient.address || newRecipient.percentage <= 0) return;
     
@@ -118,14 +121,13 @@ const Split = () => {
 
   return (
     <div className="p-4 md:p-6 space-y-4 md:space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Payment Split Configuration</h1>
-          <p className="text-sm text-muted-foreground">Configure how incoming payments are distributed</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Earn</h1>
+          <p className="text-sm text-muted-foreground">
+            Configure how incoming payments are distributed and track automatic earnings <span className="font-semibold text-green-600">+ {fixedYieldAPY}% APY</span>
+          </p>
         </div>
-        <Badge variant={totalPercentage === 100 ? "default" : "destructive"} className="text-base md:text-lg px-3 md:px-4 py-1 md:py-2 w-fit">
-          Total: {totalPercentage}%
-        </Badge>
       </div>
 
       <div className="grid gap-4 md:gap-6 grid-cols-1 lg:grid-cols-2">
@@ -257,7 +259,7 @@ const Split = () => {
               <PieChartIcon className="w-5 h-5" />
               Split Distribution
             </CardTitle>
-            <CardDescription>Visual breakdown of payment splits</CardDescription>
+            <CardDescription>Visual breakdown of earn distribution</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -369,6 +371,8 @@ const Split = () => {
           </div>
         </CardContent>
       </Card>
+
+
     </div>
   );
 };
